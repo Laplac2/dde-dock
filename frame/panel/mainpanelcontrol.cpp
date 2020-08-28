@@ -247,6 +247,7 @@ void MainPanelControl::addPluginAreaItem(int index, QWidget *wdg)
     QBoxLayout * boxLayout = new QBoxLayout(QBoxLayout::LeftToRight);
     boxLayout->addWidget(wdg, 0, Qt::AlignCenter);
     m_pluginAreaLayout->insertLayout(index, boxLayout, 0);
+    qDebug() << "--> MainPanelControl::addPluginAreaItem:" << wdg->objectName();
 }
 
 void MainPanelControl::removeFixedAreaItem(QWidget *wdg)
@@ -302,6 +303,7 @@ void MainPanelControl::updateAppAreaSonWidgetSize()
 
 void MainPanelControl::setPositonValue(Dock::Position position)
 {
+    qDebug() << "--> MainPanelControl::setPositonValue:" << m_position << position;
     if (m_position == position)
         return;
 
@@ -673,6 +675,7 @@ void MainPanelControl::mousePressEvent(QMouseEvent *e)
 
 void MainPanelControl::startDrag(DockItem *dockItem)
 {
+    qDebug() << "--> MainPanelControl::startDrag:" << dockItem->grab() << dockItem->itemType() << dockItem->sizeHint() << dockItem->rect();
     QPointer<DockItem> item = dockItem;
     const QPixmap pixmap = item->grab();
 
@@ -880,6 +883,7 @@ void MainPanelControl::itemUpdated(DockItem *item)
 {
     item->updateGeometry();
     resizeDockIcon();
+    qDebug() << "--> MainPanelControl::itemUpdated:" << item->parentWidget()->objectName() << item->objectName() << item->rect() << item->size() << item->sizeHint();
 }
 
 void MainPanelControl::showEvent(QShowEvent *event)

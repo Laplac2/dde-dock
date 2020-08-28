@@ -92,6 +92,7 @@ bool NetworkPlugin::pluginIsDisable()
 const QString NetworkPlugin::itemCommand(const QString &itemKey)
 {
     Q_UNUSED(itemKey)
+    /* ??? */
     return (m_hasDevice && !m_networkItem->isShowControlCenter())
             ? QString()
             : QString("dbus-send --print-reply "
@@ -163,6 +164,8 @@ void NetworkPlugin::pluginSettingsChanged()
 
 void NetworkPlugin::onDeviceListChanged(const QList<NetworkDevice *> devices)
 {
+    qDebug() << "--> NetworkPlugin::onDeviceListChanged:" << devices.count();
+
     QMap<QString, WirelessItem*> wirelessItems;
     QMap<QString, WiredItem *> wiredItems;
 
@@ -192,6 +195,7 @@ void NetworkPlugin::onDeviceListChanged(const QList<NetworkDevice *> devices)
             else
                 text = tr("Wired Network %1").arg(wiredNum);
             item = new WiredItem(static_cast<WiredDevice *>(device), text);
+            qDebug() << "--> wired device info:" << static_cast<WiredItem*>(item)->getActiveWiredConnectionInfo();
             wiredItems.insert(path, static_cast<WiredItem *>(item));
 
             connect(static_cast<WiredItem *>(item), &WiredItem::wiredStateChanged,
@@ -238,6 +242,9 @@ void NetworkPlugin::onDeviceListChanged(const QList<NetworkDevice *> devices)
         connect(item, &DeviceItem::requestSetDeviceEnable, m_networkWorker, &NetworkWorker::setDeviceEnable);
         connect(m_networkModel, &NetworkModel::connectivityChanged, item, &DeviceItem::refreshConnectivity);
         connect(m_networkModel, &NetworkModel::connectivityChanged, m_networkItem, &NetworkItem::updateSelf);
+        connect(m_networkModel, &NetworkModel::connectivityChanged, [=](int connectivity){
+            qDebug() << "-->> NetworkModel::connectivityChanged:" << connectivity;
+        });
     }
 
     m_hasDevice = wiredItems.size() || wirelessItems.size();

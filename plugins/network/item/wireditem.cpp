@@ -121,6 +121,8 @@ void WiredItem::setDeviceEnabled(bool enabled)
 
 WiredItem::WiredStatus WiredItem::getDeviceState()
 {
+    qDebug() << "--> WiredItem::getDeviceState:" << m_device->status() << NetworkModel::connectivity();
+
     if (!m_device->enabled()) {
         return Disabled;
     }
@@ -131,7 +133,7 @@ WiredItem::WiredStatus WiredItem::getDeviceState()
     if (m_device->obtainIpFailed()) {
         return ObtainIpFailed;
     }
-
+    qDebug() << "--> WiredItem::getDeviceState:" << m_device->status();
     switch (m_device->status()) {
         case NetworkDevice::Unknown:       return Unknown;
         case NetworkDevice::Unmanaged:
@@ -152,6 +154,7 @@ WiredItem::WiredStatus WiredItem::getDeviceState()
 
 QJsonObject WiredItem::getActiveWiredConnectionInfo()
 {
+    qDebug() << "--> WiredItem::getActiveWiredConnectionInfo";
     return static_cast<WiredDevice *>(m_device.data())->activeWiredConnectionInfo();
 }
 
@@ -244,6 +247,7 @@ void WiredItem::refreshConnectivity()
 
 void WiredItem::deviceStateChanged(NetworkDevice::DeviceStatus state)
 {
+    qDebug() << "--> WiredItem::deviceStateChanged:" << state;
     m_deviceState = state;
     switch (state) {
         case NetworkDevice::Unknown:
@@ -285,6 +289,7 @@ void WiredItem::deviceStateChanged(NetworkDevice::DeviceStatus state)
 
 void WiredItem::changedActiveWiredConnectionInfo(const QJsonObject &connInfo)
 {
+    qDebug() << "--> WiredItem::changedActiveWiredConnectionInfo:" << connInfo;
     if (connInfo.isEmpty()) {
         m_stateButton->setVisible(false);
     } else {

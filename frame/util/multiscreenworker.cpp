@@ -104,6 +104,14 @@ void MultiScreenWorker::initShow()
     }
 }
 
+/**
+ * @brief dockRect
+ * @param screenName            屏幕名
+ * @param pos                   任务栏位置
+ * @param hideMode              模式
+ * @param displayMode           状态
+ * @return                      按照给定的数据计算出任务栏所在位置
+ */
 QRect MultiScreenWorker::dockRect(const QString &screenName, const Position &pos, const HideMode &hideMode, const DisplayMode &displayMode)
 {
     if (hideMode == HideMode::KeepShowing)
@@ -112,11 +120,24 @@ QRect MultiScreenWorker::dockRect(const QString &screenName, const Position &pos
         return getDockHideGeometry(screenName, pos, displayMode);
 }
 
+/**
+ * @brief dockRect
+ * @param screenName        屏幕名
+ * @return                  按照当前屏幕的当前属性给出任务栏所在区域
+ */
 QRect MultiScreenWorker::dockRect(const QString &screenName)
 {
     return dockRect(screenName, m_position, m_hideMode, m_displayMode);
 }
 
+/**
+ * @brief realDockRect      给出不计算缩放情况的区域信息(和后端接口保持一致)
+ * @param screenName        屏幕名
+ * @param pos               任务栏位置
+ * @param hideMode          模式
+ * @param displayMode       状态
+ * @return
+ */
 QRect MultiScreenWorker::dockRectWithoutScale(const QString &screenName, const Position &pos, const HideMode &hideMode, const DisplayMode &displayMode)
 {
     if (hideMode == HideMode::KeepShowing)
@@ -158,6 +179,10 @@ void MultiScreenWorker::onAutoHideChanged(bool autoHide)
     }
 }
 
+/**
+ * @brief updateDaemonDockSize
+ * @param dockSize              这里的高度是通过qt获取的，不能使用后端的接口数据
+ */
 void MultiScreenWorker::updateDaemonDockSize(int dockSize)
 {
     m_dockInter->setWindowSize(uint(dockSize));
@@ -213,6 +238,7 @@ void MultiScreenWorker::handleDbusSignal(QDBusMessage msg)
 
 void MultiScreenWorker::onRegionMonitorChanged(int x, int y, const QString &key)
 {
+    // qDebug() << "--> onRegionMonitorChanged:" << x << y << key << m_registerKey;
     if (m_registerKey != key || m_btnPress)
         return;
 
@@ -288,6 +314,8 @@ void MultiScreenWorker::monitorAdded(const QString &path)
     mon->setY(inter->y());
     mon->setW(inter->width());
     mon->setH(inter->height());
+
+    qDebug() << "Add monitor:" << mon->name() << mon->rect();
 
     m_mtrInfo.insert(mon, inter);
 
@@ -523,7 +551,7 @@ void MultiScreenWorker::onHideStateChanged()
         m_ds.updateDockedScreen(getValidScreen(m_position));
     }
 
-    qInfo() << "hidestate change:" << m_hideMode << m_hideState;
+    // qInfo() << "hidestate change:" << m_hideMode << m_hideState;
 
     if (m_hideMode == HideMode::KeepShowing
         || ((m_hideMode == HideMode::KeepHidden || m_hideMode == HideMode::SmartHide) && m_hideState == HideState::Show)) {
@@ -669,6 +697,9 @@ void MultiScreenWorker::onRequestUpdateRegionMonitor()
     m_touchRegisterKey = m_touchEventInter->RegisterAreas(m_touchRectList, flags);
 }
 
+/**
+ * @brief 通知后端任务栏所在位置
+ */
 void MultiScreenWorker::onRequestUpdateFrontendGeometry()
 {
     const QRect rect = dockRectWithoutScale(m_ds.current(), m_position, HideMode::KeepShowing, m_displayMode);
@@ -677,10 +708,7 @@ void MultiScreenWorker::onRequestUpdateFrontendGeometry()
     if (rect.width() == 0 || rect.height() == 0)
         return;
 
-#ifdef QT_DEBUG
-    qDebug() << rect;
-#endif
-
+    qDebug() << "RequestUpdateFrontendGeometry:" << rect;
     m_dockInter->SetFrontendWindowRect(int(rect.x()), int(rect.y()), uint(rect.width()), uint(rect.height()));
     emit requestUpdateDockEntry();
 }
@@ -802,7 +830,7 @@ void MultiScreenWorker::updateMonitorDockedInfo()
         qFatal("shouldn't be here");
     }
 
-    qInfo() << "monitor info changed" << s1->rect() << s2->rect();
+    qInfo() << "monitor info:" << s1->rect() << s2->rect();
 
     // 先重置
     s1->dockPosition().reset();
@@ -842,6 +870,10 @@ void MultiScreenWorker::updateMonitorDockedInfo()
     }
 }
 
+/**
+ * @brief updatePrimaryDisplayRotation
+ * 更新主屏幕的方向
+ */
 void MultiScreenWorker::updatePrimaryDisplayRotation()
 {
     //多次调用后,会append多次,造成重复项,因此先清空当前保存的旋转方向
@@ -1040,6 +1072,10 @@ void MultiScreenWorker::initDBus()
     }
 }
 
+/**
+ * @brief initDisplayData
+ * 初始化任务栏的所有必要信息,并更新其位置
+ */
 void MultiScreenWorker::initDisplayData()
 {
     //1\初始化monitor信息
@@ -1055,6 +1091,10 @@ void MultiScreenWorker::initDisplayData()
     resetDockScreen();
 }
 
+/**
+ * @brief reInitDisplayData
+ * 重新初始化任务栏的所有必要信息,并更新其位置
+ */
 void MultiScreenWorker::reInitDisplayData()
 {
     initDBus();
@@ -1191,6 +1231,13 @@ void MultiScreenWorker::displayAnimation(const QString &screen, AniAction act)
     return displayAnimation(screen, m_position, act);
 }
 
+/**
+ * @brief changeDockPosition    做一个动画操作
+ * @param lastScreen            上次任务栏所在的屏幕
+ * @param deskScreen            任务栏要移动到的屏幕
+ * @param fromPos               任务栏上次的方向
+ * @param toPos                 任务栏打算移动到的方向
+ */
 void MultiScreenWorker::changeDockPosition(QString fromScreen, QString toScreen, const Position &fromPos, const Position &toPos)
 {
     if (fromScreen == toScreen && fromPos == toPos) {
@@ -1291,6 +1338,10 @@ void MultiScreenWorker::changeDockPosition(QString fromScreen, QString toScreen,
     group->start(QVariantAnimation::DeleteWhenStopped);
 }
 
+/**
+ * @brief updateDockScreenName  将任务栏所在屏幕信息进行更新,在任务栏切换屏幕显示后,这里应该被调用
+ * @param screenName            目标屏幕
+ */
 void MultiScreenWorker::updateDockScreenName(const QString &screenName)
 {
     Q_UNUSED(screenName);
@@ -1300,6 +1351,10 @@ void MultiScreenWorker::updateDockScreenName(const QString &screenName)
     qInfo() << "update dock screen: " << m_ds.current();
 }
 
+/**
+ * @brief getValidScreen        获取一个当前任务栏可以停靠的屏幕，优先使用主屏
+ * @return
+ */
 QString MultiScreenWorker::getValidScreen(const Position &pos)
 {
     QList<Monitor *> monitorList = m_mtrInfo.validMonitor();
@@ -1368,6 +1423,10 @@ void MultiScreenWorker::resetDockScreen()
     parent()->panel()->move(0, 0);
 }
 
+/**
+ * @brief checkDaemonDockService
+ * 避免com.deepin.dde.daemon.Dock服务比dock晚启动，导致dock启动后的状态错误
+ */
 void MultiScreenWorker::checkDaemonDockService()
 {
     auto connectionInit = [ = ](DBusDock * dockInter) {
@@ -1412,6 +1471,10 @@ void MultiScreenWorker::checkDaemonDockService()
     }
 }
 
+/**
+ * @brief checkDaemonDisplayService
+ * 避免com.deepin.daemon.Display服务比dock晚启动，导致dock启动后的状态错误
+ */
 void MultiScreenWorker::checkDaemonDisplayService()
 {
     auto connectionInit = [ = ](DisplayInter *displayInter) {
@@ -1427,7 +1490,7 @@ void MultiScreenWorker::checkDaemonDisplayService()
     QDBusConnectionInterface *ifc = QDBusConnection::sessionBus().interface();
 
     if (!ifc->isServiceRegistered(serverName)) {
-        connect(ifc, &QDBusConnectionInterface::serviceOwnerChanged, this, [ = ](const QString & name, const QString & oldOwner, const QString & newOwner) {
+        connect(ifc, &QDBusConnectionInterface::serviceOwnerChanged, this, [ = ](const QString &name, const QString &oldOwner, const QString &newOwner) {
             Q_UNUSED(oldOwner)
             if (name == serverName && !newOwner.isEmpty()) {
                 FREE_POINT(m_displayInter);
@@ -1450,6 +1513,10 @@ void MultiScreenWorker::checkDaemonDisplayService()
     }
 }
 
+/**
+ * @brief checkDaemonXEventMonitorService
+ * 避免com.deepin.api.XEventMonitor服务比dock晚启动，导致dock启动后的状态错误
+ */
 void MultiScreenWorker::checkXEventMonitorService()
 {
     auto connectionInit = [ = ](XEventMonitor * eventInter, XEventMonitor * extralEventInter, XEventMonitor * touchEventInter) {
@@ -1751,6 +1818,11 @@ void MultiScreenWorker::onTouchRelease(int type, int x, int y, const QString &ke
     tryToShowDock(x, y);
 }
 
+/**
+ * @brief tryToShowDock 根据xEvent监控区域信号的x，y坐标处理任务栏唤醒显示
+ * @param eventX        监控信号x坐标
+ * @param eventY        监控信号y坐标
+ */
 void MultiScreenWorker::tryToShowDock(int eventX, int eventY)
 {
     if (m_draging || m_aniStart) {
@@ -1815,6 +1887,10 @@ void MultiScreenWorker::tryToShowDock(int eventX, int eventY)
     }
 }
 
+/**
+ * @brief gsetting配置改变响应槽
+ * @param changeKey
+ */
 void MultiScreenWorker::onConfigChange(const QString &changeKey)
 {
     if (changeKey == MonitorsSwitchTime) {

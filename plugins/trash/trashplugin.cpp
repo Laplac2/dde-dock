@@ -68,7 +68,7 @@ void TrashPlugin::init(PluginProxyInterface *proxyInter)
     // blumia: we are using i10n translation from DFM so...
     QString applicationName = qApp->applicationName();
     qApp->setApplicationName("dde-file-manager");
-    qDebug() << qApp->loadTranslator();
+    // qDebug() << qApp->loadTranslator();
     qApp->setApplicationName(applicationName);
 
     m_proxyInter = proxyInter;
@@ -194,4 +194,3 @@ void TrashPlugin::refreshPluginItemsVisible()
         m_proxyInter->itemAdded(this, pluginName());
     }
 }
-

@@ -412,6 +412,9 @@ bool MainWindow::appIsOnDock(const QString &appDesktop)
     return DockItemManager::instance()->appIsOnDock(appDesktop);
 }
 
+/**
+ * @brief 设置拖拽区域为边缘5像素（不考虑缩放）
+ */
 void MainWindow::resetDragWindow()
 {
     switch (m_multiScreenWorker->position()) {
@@ -572,6 +575,7 @@ void MainWindow::setGeometry(const QRect &rect)
         return;
     }
     lastRect = rect;
+    qDebug() << "set dock geometry to dbus:" << rect;
     DBlurEffectWidget::setGeometry(rect);
     emit panelGeometryChanged();
 }
@@ -600,6 +604,21 @@ void MainWindow::sendNotifications()
             .arg(hints)                                                           // hints
             .arg(15000)                                                           // timeout
             .call();
+
+        // QDBusInterface notification("com.deepin.dde.Notification",
+        //                             "/com/deepin/dde/Notification",
+        //                             "com.deepin.dde.Notification",
+        //                             QDBusConnection::sessionBus(), this);
+        // QList<QVariant> arg;
+        // arg << QCoreApplication::applicationName() // appname
+        //     << static_cast<unsigned int>(0)        // id
+        //     << QString("preferences-system")       // icon
+        //     << QString("safe mode")                // summary
+        //     << QString(tr("dock is in safe mode")) // content
+        //     << button                              // action
+        //     << hints                               // hints
+        //     << static_cast<int>(15000);            // timeout
+        // notification.callWithArgumentList(QDBus::AutoDetect, "Notify", arg);
     });
 }
 

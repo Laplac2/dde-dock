@@ -40,7 +40,7 @@ SystemTrayItem::SystemTrayItem(PluginsItemInterface *const pluginInter, const QS
     , m_popupAdjustDelayTimer(new QTimer(this))
     , m_itemKey(itemKey)
 {
-    qDebug() << "load tray plugins item: " << m_pluginInter->pluginName() << itemKey << m_centralWidget;
+    // qDebug() << "load tray plugins item: " << m_pluginInter->pluginName() << itemKey << m_centralWidget;
 
     m_centralWidget->setParent(this);
     m_centralWidget->setVisible(true);
@@ -283,6 +283,7 @@ void SystemTrayItem::showEvent(QShowEvent *event)
 
 const QPoint SystemTrayItem::popupMarkPoint() const
 {
+    qDebug()<<"--> SystemTrayItem::popupMarkPoint:"<<topleftPoint();
     QPoint p(topleftPoint());
 
     const QRect r = rect();
@@ -312,6 +313,7 @@ const QPoint SystemTrayItem::topleftPoint() const
     QPoint p;
     const QWidget *w = this;
     do {
+        qDebug() << "--> SystemTrayItem::topleftPoint:" << w->objectName() << w->pos();
         p += w->pos();
         w = qobject_cast<QWidget *>(w->parent());
     } while (w);
@@ -383,6 +385,7 @@ void SystemTrayItem::showPopupWindow(QWidget *const content, const bool model)
     popup->setContent(content);
 
     QPoint p = popupMarkPoint();
+    qDebug() << "--> SystemTrayItem::showPopupWindow:" << p;
     if (!popup->isVisible())
         QMetaObject::invokeMethod(popup, "show", Qt::QueuedConnection, Q_ARG(QPoint, p), Q_ARG(bool, model));
     else

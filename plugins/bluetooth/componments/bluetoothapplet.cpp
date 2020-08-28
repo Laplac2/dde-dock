@@ -256,4 +256,3 @@ void BluetoothApplet::updateSize()
     hetght = hetght > maxHeight ? maxHeight : hetght;
     setFixedSize(ItemWidth, hetght);
 }
-

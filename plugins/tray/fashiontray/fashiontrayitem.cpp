@@ -227,7 +227,7 @@ void FashionTrayItem::dragEnterEvent(QDragEnterEvent *event)
 
 void FashionTrayItem::init()
 {
-    qDebug() << "init Fashion mode tray plugin item";
+    // qDebug() << "init Fashion mode tray plugin item";
     m_controlWidget->setExpanded(m_trayPlugin->getValue(FASHION_MODE_ITEM_KEY, ExpandedKey, true).toBool());
     setDockPosition(m_trayPlugin->dockPosition());
     onExpandChanged(m_controlWidget->expanded());
@@ -382,7 +382,7 @@ void FashionTrayItem::resizeTray()
         m_attentionContainer->setFixedHeight(m_iconSize * m_attentionContainer->itemCount());
 
         m_controlWidget->setFixedSize(QWIDGETSIZE_MAX, m_iconSize);
-    }    
+    }
 
     m_normalContainer->updateSize();
 }

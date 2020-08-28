@@ -112,6 +112,7 @@ void AbstractPluginsController::removeValue(PluginsItemInterface *const itemInte
 
 QMap<PluginsItemInterface *, QMap<QString, QObject *> > &AbstractPluginsController::pluginsMap()
 {
+    // qDebug() << "--> AbstractPluginsController::pluginsMap" << m_pluginsMap;
     return m_pluginsMap;
 }
 
@@ -180,6 +181,7 @@ void AbstractPluginsController::positionChanged()
 
 void AbstractPluginsController::loadPlugin(const QString &pluginFile)
 {
+    // qDebug() << "--> AbstractPluginsController::loadPlugin:" << pluginFile;
     QPluginLoader *pluginLoader = new QPluginLoader(pluginFile);
     const QJsonObject &meta = pluginLoader->metaData().value("MetaData").toObject();
     const QString &pluginApi = meta.value("api").toString();
@@ -245,15 +247,15 @@ void AbstractPluginsController::loadPlugin(const QString &pluginFile)
 
 void AbstractPluginsController::initPlugin(PluginsItemInterface *interface)
 {
-    qDebug() << objectName() << "init plugin: " << interface->pluginName();
+    // qDebug() << objectName() << "init plugin: " << interface->pluginName();
     interface->init(this);
-    qDebug() << objectName() << "init plugin finished: " << interface->pluginName();
+    // qDebug() << objectName() << "init plugin finished: " << interface->pluginName();
 }
 
 void AbstractPluginsController::refreshPluginSettings()
 {
     const QString &pluginSettings = m_dockDaemonInter->GetPluginSettings().value();
-    qDebug() << pluginSettings;
+    // qDebug() << pluginSettings;
     if (pluginSettings.isEmpty()) {
         qDebug() << "Error! get plugin settings from dbus failed!";
         return;

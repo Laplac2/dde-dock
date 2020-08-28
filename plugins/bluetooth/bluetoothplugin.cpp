@@ -128,6 +128,8 @@ int BluetoothPlugin::itemSortKey(const QString &itemKey)
 
 void BluetoothPlugin::setSortKey(const QString &itemKey, const int order)
 {
+    qDebug()<<"--> set sortkey bluetooth4:"<< itemKey << order;
+
     const QString key = QString("pos_%1_%2").arg(itemKey).arg(Dock::Efficient);
 
     m_proxyInter->saveValue(this, key, order);

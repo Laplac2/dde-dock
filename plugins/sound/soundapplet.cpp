@@ -577,7 +577,7 @@ void SoundApplet::removeLastDevice()
         m_lastPort->setCardId(m_ports.at(0)->cardId());
         m_lastPort->setCardName(m_ports.at(0)->cardName());
         startRemovePort(m_ports.at(0)->id(), m_ports.at(0)->cardId());
-        qDebug() << "remove last output device";
+        // qDebug() << "remove last output device";
     }
 }
 
@@ -593,7 +593,7 @@ void SoundApplet::removeDisabledDevice(QString portId, unsigned int cardId)
         enableDevice(false);
         disableAllDevice();
     }
-    qDebug() << "remove disabled output device";
+    // qDebug() << "remove disabled output device";
 }
 
 void SoundApplet::haldleDbusSignal(const QDBusMessage &msg)
@@ -640,6 +640,3 @@ void SoundApplet::portEnableChange(unsigned int cardId, QString portId)
     m_deviceInfo = "";
     updateCradsInfo();
 }
-
-
-

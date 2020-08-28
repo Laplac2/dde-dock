@@ -162,6 +162,7 @@ void BluetoothItem::refreshIcon()
 
 void BluetoothItem::refreshTips()
 {
+    qDebug() << "--> BluetoothItem::refreshTips:" << m_devState;
     QString tipsText;
     QStringList textList;
 

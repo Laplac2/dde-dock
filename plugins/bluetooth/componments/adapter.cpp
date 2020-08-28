@@ -68,7 +68,7 @@ void Adapter::addDevice(const QJsonObject &deviceObj)
     device->setRssi(rssi);
     device->setAdapterId(m_id);
     device->setDeviceType(bluetoothDeviceType);
-
+    qDebug() << "add device to list:" << device->deviceTime();
     m_devices[id] = device;
     divideDevice(device);
 
@@ -153,6 +153,7 @@ void Adapter::setPowered(bool powered)
 void Adapter::initDevicesList(const QJsonDocument &doc)
 {
     QJsonArray arr = doc.array();
+    qDebug() << "--> Adapter::initDevicesList:";
     for (QJsonValue val : arr) {
         QJsonObject deviceObj = val.toObject();
         const QString adapterId = deviceObj["AdapterPath"].toString();
@@ -173,7 +174,7 @@ void Adapter::initDevicesList(const QJsonDocument &doc)
         device->setRssi(rssi);
         device->setAdapterId(adapterId);
         device->setDeviceType(bluetoothDeviceType);
-
+        qDebug() << device->name() << device->deviceTime();
         m_devices[id] = device;
         divideDevice(device);
     }
@@ -196,9 +197,9 @@ void Adapter::setId(const QString &id)
 
 void Adapter::setDiscover(bool discover)
 {
+    qDebug() << "--> Adapter::setDiscover:" << m_discover << discover;
     if (discover != m_discover) {
         m_discover = discover;
         Q_EMIT discoveringChanged(discover);
     }
 }
-

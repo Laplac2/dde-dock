@@ -140,6 +140,7 @@ void MenuWorker::initConnection()
 
 void MenuWorker::showDockSettingsMenu()
 {
+    // qDebug() << "--> MenuWorker::showDockSettingsMenu1";
     QTimer::singleShot(0, this, [=] {
         onGSettingsChanged("enable");
     });
@@ -148,11 +149,16 @@ void MenuWorker::showDockSettingsMenu()
 
     bool hasComposite = DWindowManagerHelper::instance()->hasComposite();
 
+    // qDebug() << "--> MenuWorker::showDockSettingsMenu2";
+
     // create actions
     QList<QAction *> actions;
     for (auto *p : m_itemManager->pluginList()) {
+        // qDebug() << "--> MenuWorker::showDockSettingsMenu3" << p->pluginName();
         if (!p->pluginIsAllowDisable())
             continue;
+
+        // qDebug() << "--> MenuWorker::showDockSettingsMenu4";
 
         const bool enable = !p->pluginIsDisable();
         const QString &name = p->pluginName();
@@ -161,11 +167,11 @@ void MenuWorker::showDockSettingsMenu()
         if (!m_trashPluginShow && name == "trash") {
             continue;
         }
-
+        // qDebug() << "--> MenuWorker::showDockSettingsMenu5";
         if (name == "multitasking" && !hasComposite) {
             continue;
         }
-
+        // qDebug() << "--> MenuWorker::showDockSettingsMenu6";
         QAction *act = new QAction(display, this);
         act->setCheckable(true);
         act->setChecked(enable);
@@ -173,6 +179,7 @@ void MenuWorker::showDockSettingsMenu()
 
         actions << act;
     }
+    // qDebug() << "--> MenuWorker::showDockSettingsMenu7";
 
     // sort by name
     std::sort(actions.begin(), actions.end(), [](QAction * a, QAction * b) -> bool {

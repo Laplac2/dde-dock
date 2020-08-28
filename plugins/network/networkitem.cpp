@@ -152,37 +152,45 @@ QWidget *NetworkItem::itemApplet()
 
 QWidget *NetworkItem::itemTips()
 {
+    qDebug() << "--> NetworkItem::itemTips:" << m_tipsWidget->text();
     return m_tipsWidget;
 }
 
+/**
+ * @brief 更新设备列表（更新、增、删）
+ * @param wiredItems    有线设备列表
+ * @param wirelessItems 无线设备列表
+ */
 void NetworkItem::updateDeviceItems(QMap<QString, WiredItem *> &wiredItems, QMap<QString, WirelessItem *> &wirelessItems)
 {
-    // 已有设备不重复进行增删操作
+    qDebug() << "--> NetworkItem::updateDeviceItems1:" << wiredItems << wirelessItems;
     auto tempWiredItems = m_wiredItems;
     auto tempWirelessItems = m_wirelessItems;
-
+    /* 更新列表中的无线设备信息 */
     for (auto wirelessItem : wirelessItems) {
         if (wirelessItem) {
             auto path = wirelessItem->path();
-            if (m_wirelessItems.contains(path)) {
+            if (m_wirelessItems.contains(path)) { // 更新已有无线设备信息
                 m_wirelessItems.value(path)->setDeviceInfo(wirelessItem->deviceInfo());
                 tempWirelessItems.remove(path);
                 delete wirelessItem;
-            } else {
+            } else { // 新增无线设备
                 wirelessItem->setParent(this);
                 m_wirelessItems.insert(path, wirelessItem);
             }
         }
     }
-
+    /* 更新列表中的有线设备信息 */
     for (auto wiredItem : wiredItems) {
         if (wiredItem) {
             auto path = wiredItem->path();
-            if (m_wiredItems.contains(path)) {
+            if (m_wiredItems.contains(path)) { // 更新已有有线设备信息
+                qDebug() << "--> 1 update wired item info:" << wiredItem->getActiveWiredConnectionInfo();
                 m_wiredItems.value(path)->setTitle(wiredItem->deviceName());
                 tempWiredItems.remove(path);
                 delete wiredItem;
-            } else {
+            } else { // 新增有线设备
+                qDebug() << "--> 2 add wired item:" << wiredItem->getActiveWiredConnectionInfo();
                 wiredItem->setParent(this);
                 m_wiredItems.insert(path, wiredItem);
                 wiredItem->setVisible(true);
@@ -190,7 +198,7 @@ void NetworkItem::updateDeviceItems(QMap<QString, WiredItem *> &wiredItems, QMap
             }
         }
     }
-
+    /* 删除列表中失效的无线设备 */
     for (auto wirelessItem : tempWirelessItems) {
         if (wirelessItem) {
             auto path = wirelessItem->device()->path();
@@ -201,8 +209,10 @@ void NetworkItem::updateDeviceItems(QMap<QString, WiredItem *> &wiredItems, QMap
             delete wirelessItem;
         }
     }
+    /* 删除列表中失效的有线设备 */
     for (auto wiredItem : tempWiredItems) {
         if (wiredItem) {
+            qDebug() << "--> 3 remove wired item info:" << wiredItem->getActiveWiredConnectionInfo();
             auto path = wiredItem->device()->path();
             m_wiredItems.remove(path);
             m_connectedWiredDevice.remove(path);
@@ -211,7 +221,10 @@ void NetworkItem::updateDeviceItems(QMap<QString, WiredItem *> &wiredItems, QMap
             delete wiredItem;
         }
     }
-
+    qDebug() << "--> NetworkItem::updateDeviceItems2:" << m_connectedWiredDevice << m_wiredItems;
+    for (auto device : m_connectedWiredDevice) {
+        qDebug() << "--> 4 conneted wired device info:" << device->getActiveWiredConnectionInfo();
+    }
     updateSelf();
 }
 
@@ -285,9 +298,14 @@ void NetworkItem::invokeMenuItem(const QString &menuId, const bool checked)
         .call();
 }
 
+/**
+ * @brief 根据网络状态刷新图标
+ */
 void NetworkItem::refreshIcon()
 {
-    // 刷新按钮图标
+    qDebug() << "--> NetworkItem::refreshIcon1:" << m_pluginState;
+
+    /* 根据主题类型获取对应图标路径 */
     QPixmap pixmap;
     if (DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType)
         pixmap = DHiDPIHelper::loadNxPixmap(":/wireless/resources/wireless/refresh_dark.svg");
@@ -411,6 +429,7 @@ void NetworkItem::refreshIcon()
     m_iconPixmap = ImageUtil::loadSvg(iconString, ":/", iconSize, ratio);
 
     update();
+    qDebug() << "--> NetworkItem::refreshIcon2:" << stateString << iconString;
 }
 
 void NetworkItem::resizeEvent(QResizeEvent *e)
@@ -502,13 +521,18 @@ void NetworkItem::onThemeTypeChanged(DGuiApplicationHelper::ColorType themeType)
     refreshIcon();
 }
 
+/**
+ * @brief 获取网络状态
+ */
 void NetworkItem::getPluginState()
 {
+    qDebug() << "--> NetworkItem::getPluginState:" << m_connectedWiredDevice << m_wiredItems;
+
     int wiredState = 0;
     int wirelessState = 0;
     int state = 0;
     int temp = 0;
-    // 所有设备状态叠加
+    /* 所有无线设备状态叠加 */
     QMapIterator<QString, WirelessItem *> iwireless(m_wirelessItems);
     while (iwireless.hasNext()) {
         iwireless.next();
@@ -554,6 +578,7 @@ void NetworkItem::getPluginState()
         wirelessState = WirelessItem::Authenticating;
     }
 
+    /* 所有有线设备状态叠加 */
     state = 0;
     temp = 0;
     QMapIterator<QString, WiredItem *> iwired(m_wiredItems);
@@ -569,7 +594,10 @@ void NetworkItem::getPluginState()
                 m_connectedWiredDevice.remove(iwired.key());
             }
         }
+        qDebug() << "--> wiredItem info:" << wiredItem->getActiveWiredConnectionInfo();
     }
+    qDebug() << "--> m_connectedWiredDevice:" << m_connectedWiredDevice;
+
     temp = state;
     if (!temp)
         wiredState = WiredItem::Unknown;
@@ -602,7 +630,7 @@ void NetworkItem::getPluginState()
     if ((temp & WiredItem::Authenticating) >> 5) {
         wiredState = WiredItem::Authenticating;
     }
-
+    qDebug() << "wiredState:" << wiredState << ", wirelessState:" << wirelessState ;
     switch (wirelessState | wiredState) {
     case 0:
         m_pluginState = Unknow;
@@ -1001,7 +1029,7 @@ void NetworkItem::getPluginState()
         m_pluginState = Failed;
         break;
     }
-
+    qDebug() << "get network state:" << m_pluginState;
     switch (m_pluginState) {
     case Unknow:
     case Disabled:
@@ -1091,11 +1119,13 @@ void NetworkItem::updateView()
 
 void NetworkItem::updateSelf()
 {
+    qDebug() << "--> NetworkItem::updateSelf1:" << m_pluginState << m_connectedWiredDevice << m_connectedWirelessDevice;
     getPluginState();
     updateMasterControlSwitch();
     refreshIcon();
     refreshTips();
     updateView();
+    qDebug() << "--> NetworkItem::updateSelf2" << m_pluginState << m_connectedWiredDevice << m_connectedWirelessDevice;
 }
 
 int NetworkItem::getStrongestAp()
@@ -1175,6 +1205,7 @@ void NetworkItem::updateMasterControlSwitch()
 
 void NetworkItem::refreshTips()
 {
+    qDebug() << "--> NetworkItem::refreshTips:" << m_pluginState << m_connectedWiredDevice << m_connectedWirelessDevice;
     switch (m_pluginState) {
     case Disabled:
     case Adisabled:
@@ -1186,6 +1217,7 @@ void NetworkItem::refreshTips()
         QStringList textList;
         int wirelessIndex = 1;
         int wireIndex = 1;
+        /* 根据无线设备网络状态刷新 tips */
         for (auto wirelessItem : m_connectedWirelessDevice) {
             if (wirelessItem) {
                 auto info = wirelessItem->getActiveWirelessConnectionInfo();
@@ -1203,6 +1235,7 @@ void NetworkItem::refreshTips()
                 textList << strTips;
             }
         }
+        /* 根据有线设备网络状态刷新 tips */
         for (auto wiredItem : m_connectedWiredDevice) {
             if (wiredItem) {
                 auto info = wiredItem->getActiveWiredConnectionInfo();
@@ -1244,6 +1277,7 @@ void NetworkItem::refreshTips()
                 textList << strTips;
             }
         }
+        qDebug() << "--> Bconnected tips:" << textList;
         m_tipsWidget->setTextList(textList);
     }
     break;
@@ -1251,11 +1285,14 @@ void NetworkItem::refreshTips()
         QString strTips;
         QStringList textList;
         int wireIndex = 1;
+        /* 根据有线设备网络状态刷新 tips */
         for (auto wiredItem : m_connectedWiredDevice) {
             if (wiredItem) {
                 auto info = wiredItem->getActiveWiredConnectionInfo();
-                if (!info.contains("Ip4"))
+                if (!info.contains("Ip4")){
+                    qDebug() << "--> wired item info:" << info;
                     continue;
+                }
                 const QJsonObject ipv4 = info.value("Ip4").toObject();
                 if (!ipv4.contains("Address"))
                     continue;

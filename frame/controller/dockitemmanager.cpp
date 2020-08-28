@@ -38,7 +38,7 @@ DockItemManager::DockItemManager(QObject *parent)
     //固定区域：启动器
     m_itemList.append(new LauncherItem);
 
-    // 应用区域
+    /* 应用区域，有几个应用，新建几个AppItem对象 */
     for (auto entry : m_appInter->entries()) {
         AppItem *it = new AppItem(entry);
         manageItem(it);
@@ -84,6 +84,7 @@ const QList<QPointer<DockItem>> DockItemManager::itemList() const
 
 const QList<PluginsItemInterface *> DockItemManager::pluginList() const
 {
+    qDebug() << "--> DockItemManager::pluginList";
     return m_pluginsInter->pluginsMap().keys();
 }
 
@@ -114,6 +115,10 @@ void DockItemManager::refershItemsIcon()
 void DockItemManager::updatePluginsItemOrderKey()
 {
     int index = 0;
+    for (auto item : m_itemList) {
+        qDebug() << "--> DockItemManager::updatePluginsItemOrderKey:" << item->objectName() << item->itemType();
+    }
+
     for (auto item : m_itemList) {
         if (item.isNull() || item->itemType() != DockItem::Plugins)
             continue;
@@ -240,6 +245,7 @@ void DockItemManager::appItemRemoved(AppItem *appItem)
 
 void DockItemManager::pluginItemInserted(PluginsItem *item)
 {
+    // qDebug() << "DockItemManager::pluginItemInserted start:" << item->pluginName() << item->itemType();
     manageItem(item);
 
     DockItem::ItemType pluginType = item->itemType();
@@ -293,6 +299,12 @@ void DockItemManager::pluginItemInserted(PluginsItem *item)
 
     updatePluginsItemOrderKey();
     emit itemInserted(insertIndex - firstPluginPosition, item);
+
+    // for (auto i : m_itemList) {
+    //     qDebug() << "m_itemList:" << i << i->itemType();
+    // }
+
+    // qDebug() << "DockItemManager::pluginItemInserted end!" << m_itemList;
 }
 
 void DockItemManager::pluginItemRemoved(PluginsItem *item)

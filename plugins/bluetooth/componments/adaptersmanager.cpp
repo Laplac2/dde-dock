@@ -154,6 +154,7 @@ void AdaptersManager::onAdapterPropertiesChanged(const QString &json)
 
     Adapter *adapter = const_cast<Adapter *>(m_adapters[id]);
     if (adapter) {
+        qDebug() << "--> AdaptersManager::onAdapterPropertiesChanged:" << json;
         inflateAdapter(adapter, obj);
     }
 }
@@ -171,7 +172,10 @@ void AdaptersManager::onDevicePropertiesChanged(const QString &json)
 
 void AdaptersManager::onAddAdapter(const QString &json)
 {
+    qDebug() << "--> AdaptersManager::addAdapter:" << json;
     const QJsonDocument doc = QJsonDocument::fromJson(json.toUtf8());
+    qDebug() << "--> Add adapter:\n"
+             << doc;
     auto adapter = new Adapter(this);
     adapterAdd(adapter, doc.object());
 }
@@ -198,6 +202,8 @@ void AdaptersManager::onRemoveAdapter(const QString &json)
 void AdaptersManager::onAddDevice(const QString &json)
 {
     const QJsonDocument doc = QJsonDocument::fromJson(json.toUtf8());
+    qDebug() << "--> Add device:\n"
+             << doc;
     const QJsonObject obj = doc.object();
     const QString adapterId = obj["AdapterPath"].toString();
     const QString deviceId = obj["Path"].toString();
@@ -239,7 +245,7 @@ void AdaptersManager::adapterAdd(Adapter *adapter, const QJsonObject &adpterObj)
 {
     if (!adapter)
         return;
-
+    qDebug() << "--> AdaptersManager::adapterAdd:" << adpterObj;
     inflateAdapter(adapter, adpterObj);
     QDBusObjectPath dPath(adpterObj["Path"].toString());
     QDBusPendingCall call = m_bluetoothInter->GetDevices(dPath);
@@ -283,10 +289,13 @@ void AdaptersManager::inflateAdapter(Adapter *adapter, const QJsonObject &adapte
     adapter->setName(alias);
     adapter->setPowered(powered);
     adapter->setDiscover(discovering);
+
+    qDebug() << "--> AdaptersManager::inflateAdapter:" << adapterObj;
 }
 
 void AdaptersManager::adapterRefresh(const Adapter *adapter)
 {
+    qDebug() << "--> AdaptersManager::adapterRefresh:" << adapter->id();
     QDBusObjectPath dPath(adapter->id());
     m_bluetoothInter->SetAdapterDiscoverableTimeout(dPath, 60 * 5);
     m_bluetoothInter->SetAdapterDiscoverable(dPath, true);

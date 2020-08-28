@@ -313,6 +313,7 @@ void DockItem::showPopupWindow(QWidget *const content, const bool model)
     popup->setContent(content);
 
     const QPoint p = popupMarkPoint();
+    qDebug() << "--> DockItem::showPopupWindow:" << p;
     if (!popup->isVisible())
         QMetaObject::invokeMethod(popup, "show", Qt::QueuedConnection, Q_ARG(QPoint, p), Q_ARG(bool, model));
     else
@@ -386,6 +387,7 @@ const QPoint DockItem::popupMarkPoint()
         p += QPoint(0, r.height() / 2);
         break;
     }
+    qDebug() << "--> DockItem::popupMarkPoint" << p;
     return p;
 }
 
@@ -409,9 +411,11 @@ const QPoint DockItem::topleftPoint() const
     }
     const QWidget *w = qobject_cast<QWidget *>(this->parent());
     while (w) {
+        qDebug() << "--> DockItem:" << w->objectName() << w->rect() << w->geometry();
         p += w->pos();
         w = qobject_cast<QWidget *>(w->parent());
     }
+    qDebug() << "--> DockItem::topleftPoint:" << p;
     return p;
 }
 

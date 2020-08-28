@@ -1,0 +1,172 @@
+// {
+//     \"Path\":\"/org/bluez/hci0/dev_61_AC_15_60_83_B9\",
+//     \"AdapterPath\":\"/org/bluez/hci0\",
+//     \"Alias\":\"61-AC-15-60-83-B9\",
+//     \"Trusted\":false,
+//     \"Paired\":false,
+//     \"State\":0,
+//     \"ServicesResolved\":false,
+//     \"ConnectState\":false,
+//     \"UUIDs\":[],
+//     \"Name\":\"\",
+//     \"Icon\":\"\",
+//     \"RSSI\":-90,
+//     \"Address\":\"61:AC:15:60:83:B9\"
+// }
+
+// device json
+
+{
+    "AdapterPath": "/org/bluez/hci0",
+    "Address": "61:AC:15:60:83:B9",
+    "Alias": "61-AC-15-60-83-B9",
+    "ConnectState": false,
+    "Icon": "",
+    "Name": "",
+    "Paired": false,
+    "Path": "/org/bluez/hci0/dev_61_AC_15_60_83_B9",
+    "RSSI": -90,
+    "ServicesResolved": false,
+    "State": 0,
+    "Trusted": false,
+    "UUIDs": []
+}
+// adapter json
+{
+    "Alias": "ROG-Mi",
+    "Discoverable": true,
+    "DiscoverableTimeout": 300,
+    "Discovering": false,
+    "Name": "ROG-Mi",
+    "Path": "/org/bluez/hci0",
+    "Powered": true
+}
+// device list
+('[
+    {
+        "Path": "/org/bluez/hci0/dev_48_2C_A0_24_C2_BF",
+        "AdapterPath": "/org/bluez/hci0",
+        "Alias": "MIIIIIIII",
+        "Trusted": true,
+        "Paired": true,
+        "State": 0,
+        "ServicesResolved": false,
+        "ConnectState": false,
+        "UUIDs": [
+            "00001105-0000-1000-8000-00805f9b34fb",
+            "00001108-0000-1000-8000-00805f9b34fb",
+            "0000110a-0000-1000-8000-00805f9b34fb",
+            "0000110c-0000-1000-8000-00805f9b34fb",
+            "00001112-0000-1000-8000-00805f9b34fb",
+            "00001115-0000-1000-8000-00805f9b34fb",
+            "00001116-0000-1000-8000-00805f9b34fb",
+            "0000111f-0000-1000-8000-00805f9b34fb",
+            "0000112f-0000-1000-8000-00805f9b34fb",
+            "00001132-0000-1000-8000-00805f9b34fb",
+            "00001200-0000-1000-8000-00805f9b34fb",
+            "00001800-0000-1000-8000-00805f9b34fb",
+            "00001801-0000-1000-8000-00805f9b34fb",
+            "98b97136-36a2-11ea-8467-484d7e99a198"
+        ],
+        "Name": "MIIIIIIII",
+        "Icon": "phone",
+        "RSSI": -51,
+        "Address": "48:2C:A0:24:C2:BF"
+    },
+    {
+        "Path": "/org/bluez/hci0/dev_EC_41_18_69_AA_AE",
+        "AdapterPath": "/org/bluez/hci0",
+        "Alias": "小爱音箱-2394",
+        "Trusted": true,
+        "Paired": true,
+        "State": 0,
+        "ServicesResolved": false,
+        "ConnectState": false,
+        "UUIDs": [
+            "0000110b-0000-1000-8000-00805f9b34fb",
+            "0000110c-0000-1000-8000-00805f9b34fb",
+            "0000110e-0000-1000-8000-00805f9b34fb",
+            "00001200-0000-1000-8000-00805f9b34fb",
+            "00001800-0000-1000-8000-00805f9b34fb",
+            "00001801-0000-1000-8000-00805f9b34fb"
+        ],
+        "Name": "小爱音箱-2394",
+        "Icon": "audio-card",
+        "RSSI": 0,
+        "Address": "EC:41:18:69:AA:AE"
+    },
+    {
+        "Path": "/org/bluez/hci0/dev_5B_98_4D_79_DA_F4",
+        "AdapterPath": "/org/bluez/hci0",
+        "Alias": "5B-98-4D-79-DA-F4",
+        "Trusted": false,
+        "Paired": false,
+        "State": 0,
+        "ServicesResolved": false,
+        "ConnectState": false,
+        "UUIDs": [],
+        "Name": "",
+        "Icon": "",
+        "RSSI": -85,
+        "Address": "5B:98:4D:79:DA:F4"
+    },
+    {
+        "Path": "/org/bluez/hci0/dev_64_72_D8_B5_2D_B2",
+        "AdapterPath": "/org/bluez/hci0",
+        "Alias": "Latin-S",
+        "Trusted": false,
+        "Paired": false,
+        "State": 0,
+        "ServicesResolved": false,
+        "ConnectState": false,
+        "UUIDs": [
+            "0000fff0-0000-1000-8000-00805f9b34fb"
+        ],
+        "Name": "Latin-S",
+        "Icon": "",
+        "RSSI": -95,
+        "Address": "64:72:D8:B5:2D:B2"
+    },
+    {
+        "Path": "/org/bluez/hci0/dev_48_2C_A0_24_C0_19",
+        "AdapterPath": "/org/bluez/hci0",
+        "Alias": "小猴子的MI 8",
+        "Trusted": false,
+        "Paired": false,
+        "State": 0,
+        "ServicesResolved": false,
+        "ConnectState": false,
+        "UUIDs": [
+            "00001105-0000-1000-8000-00805f9b34fb",
+            "0000110a-0000-1000-8000-00805f9b34fb",
+            "0000110c-0000-1000-8000-00805f9b34fb",
+            "00001112-0000-1000-8000-00805f9b34fb",
+            "00001115-0000-1000-8000-00805f9b34fb",
+            "00001116-0000-1000-8000-00805f9b34fb",
+            "0000111f-0000-1000-8000-00805f9b34fb",
+            "0000112f-0000-1000-8000-00805f9b34fb",
+            "00001200-0000-1000-8000-00805f9b34fb",
+            "00001132-0000-1000-8000-00805f9b34fb",
+            "00000000-0000-0000-0000-000000000000"
+        ],
+        "Name": "小猴子的MI 8",
+        "Icon": "phone",
+        "RSSI": -78,
+        "Address": "48: 2C:A0: 24:C0: 19"
+    },
+    {
+        "Path": "/org/bluez/hci0/dev_57_60_1E_00_20_7E",
+        "AdapterPath": "/org/bluez/hci0",
+        "Alias": "57-60-1E-00-20-7E",
+        "Trusted": false,
+        "Paired": false,
+        "State": 0,
+        "ServicesResolved": false,
+        "ConnectState": false,
+        "UUIDs": [],
+        "Name": "",
+        "Icon": "",
+        "RSSI": -93,
+        "Address": "57: 60:1E: 00: 20:7E"
+    }
+]')
