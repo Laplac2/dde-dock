@@ -46,7 +46,7 @@ public:
         bool bottomDock = true;
         DockPosition(bool l = true, bool t = true, bool r = true, bool b = true)
         {
-            qDebug() << leftDock << topDock << rightDock << bottomDock;
+            // qDebug() << leftDock << topDock << rightDock << bottomDock;
             leftDock = l;
             topDock = t;
             rightDock = r;

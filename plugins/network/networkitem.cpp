@@ -75,6 +75,7 @@ NetworkItem::NetworkItem(QWidget *parent)
     m_loadingIndicator->setFrameShape(QFrame::NoFrame);
     m_loadingIndicator->installEventFilter(this);
 
+    /* 无线网络部分 */
     m_wirelessLayout = new QVBoxLayout;
     m_wirelessLayout->setMargin(0);
     m_wirelessLayout->setSpacing(0);
@@ -91,6 +92,7 @@ NetworkItem::NetworkItem(QWidget *parent)
     m_wirelessControlPanel->setLayout(switchWirelessLayout);
     m_wirelessControlPanel->setFixedHeight(ControlItemHeight);
 
+    /* 有线网络部分 */
     m_wiredControlPanel = new QWidget(this);
 
     m_wiredTitle = new QLabel(m_wiredControlPanel);
@@ -124,6 +126,7 @@ NetworkItem::NetworkItem(QWidget *parent)
     centralWidget->setLayout(centralLayout);
     centralWidget->setFixedWidth(ItemWidth);
     centralWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    centralWidget->setStyleSheet("background-color: yellow"); // zzz-color
 
     m_applet->setFixedWidth(ItemWidth);
     m_applet->setWidget(centralWidget);
@@ -155,9 +158,15 @@ QWidget *NetworkItem::itemTips()
     return m_tipsWidget;
 }
 
+/**
+ * @brief 根据返回的网卡设备列表，更新现有的列表
+ *
+ * @param wiredItems 有线设备
+ * @param wirelessItems 无线设备
+ */
 void NetworkItem::updateDeviceItems(QMap<QString, WiredItem *> &wiredItems, QMap<QString, WirelessItem *> &wirelessItems)
 {
-    // 已有设备不重复进行增删操作
+    /* 猜测传过来的是当前完整的设备列表，下面根据之前的列表与现有列表比较，剔除没用了的设备 */
     auto tempWiredItems = m_wiredItems;
     auto tempWirelessItems = m_wirelessItems;
 
@@ -195,7 +204,7 @@ void NetworkItem::updateDeviceItems(QMap<QString, WiredItem *> &wiredItems, QMap
         if (wirelessItem) {
             auto path = wirelessItem->device()->path();
             m_wirelessItems.remove(path);
-            m_connectedWirelessDevice.remove(path);
+            m_connectedWirelessDevice.remove(path); // 从已连接成功的列表中去除没用了的设备
             wirelessItem->itemApplet()->setVisible(false);
             m_wirelessLayout->removeWidget(wirelessItem->itemApplet());
             delete wirelessItem;
@@ -264,6 +273,12 @@ const QString NetworkItem::contextMenu() const
     return QJsonDocument::fromVariant(menu).toJson();
 }
 
+/**
+ * @brief 调用菜单项（暂时没被调用）
+ *
+ * @param menuId
+ * @param checked
+ */
 void NetworkItem::invokeMenuItem(const QString &menuId, const bool checked)
 {
     Q_UNUSED(checked);
@@ -285,15 +300,18 @@ void NetworkItem::invokeMenuItem(const QString &menuId, const bool checked)
         .call();
 }
 
+/**
+ * @brief 根据网络连接状态显示图标
+ *
+ */
 void NetworkItem::refreshIcon()
 {
-    // 刷新按钮图标
-    QPixmap pixmap;
+    QPixmap pixmap; // 刷新按钮
     if (DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType)
         pixmap = DHiDPIHelper::loadNxPixmap(":/wireless/resources/wireless/refresh_dark.svg");
     else
         pixmap = DHiDPIHelper::loadNxPixmap(":/wireless/resources/wireless/refresh.svg");
-    m_loadingIndicator->setImageSource(pixmap);
+    m_loadingIndicator->setImageSource(pixmap); // 加载指示器
 
     QString stateString;
     QString iconString;
@@ -379,26 +397,26 @@ void NetworkItem::refreshIcon()
         update();
         return;
     }
-    case ConnectNoInternet:
-    case AconnectNoInternet: //无线已连接但无法访问互联网 offline
+    case ConnectNoInternet:  // 有线、无线已连接，但是无法访问互联网
+    case AconnectNoInternet: // 无线已连接但无法访问互联网 offline
         stateString = "offline";
         iconString = QString("network-wireless-%1-symbolic").arg(stateString);
         break;
-    case BconnectNoInternet:
+    case BconnectNoInternet: // 有线已连接，但是无法访问互联网
         stateString = "warning";
         iconString = QString("network-%1-symbolic").arg(stateString);
         break;
-    case Bfailed://有线连接失败none变为offline
+    case Bfailed: // 有线连接失败none变为offline
         stateString = "offline";
         iconString = QString("network-%1-symbolic").arg(stateString);
         break;
     case Unknow:
-    case Nocable:
+    case Nocable:             // 没插网线
         stateString = "error";//待图标 暂用错误图标
         iconString = QString("network-%1-symbolic").arg(stateString);
         break;
-    case Afailed:
-    case Failed: //无线连接失败改为 disconnect
+    case Afailed: // 无线连接失败
+    case Failed:  // 无线连接失败改为 disconnect
         stateString = "disconnect";
         iconString = QString("wireless-%1").arg(stateString);
     }
@@ -506,9 +524,10 @@ void NetworkItem::getPluginState()
 {
     int wiredState = 0;
     int wirelessState = 0;
-    int state = 0;
-    int temp = 0;
-    // 所有设备状态叠加
+    int state = 0; // 只要有一个设备连上了，这个标志为就会置1
+    int temp = 0;  // 存的是设备的连接状态
+
+    /* 所有设备状态叠加，最后确定总连接状态，并将连接了的设备存起来 */
     QMapIterator<QString, WirelessItem *> iwireless(m_wirelessItems);
     while (iwireless.hasNext()) {
         iwireless.next();
@@ -523,7 +542,8 @@ void NetworkItem::getPluginState()
             }
         }
     }
-    // 按如下顺序得到当前无线设备状态
+
+    /* 按如下顺序解析所有设备的状态，并将最有进展的状态存起来 */
     temp = state;
     if (!temp)
         wirelessState = WirelessItem::Unknown;
@@ -603,6 +623,7 @@ void NetworkItem::getPluginState()
         wiredState = WiredItem::Authenticating;
     }
 
+    /* 将无线和有线网络的连接状态取或，最终获取网络连接状态 */
     switch (wirelessState | wiredState) {
     case 0:
         m_pluginState = Unknow;
@@ -1175,6 +1196,7 @@ void NetworkItem::updateMasterControlSwitch()
 
 void NetworkItem::refreshTips()
 {
+    // qDebug() << ">" << Q_FUNC_INFO << "m_pluginState:" << m_pluginState;
     switch (m_pluginState) {
     case Disabled:
     case Adisabled:
@@ -1251,14 +1273,21 @@ void NetworkItem::refreshTips()
         QString strTips;
         QStringList textList;
         int wireIndex = 1;
+        // qDebug()<<"m_connectedWiredDevice:"<<m_connectedWiredDevice;
         for (auto wiredItem : m_connectedWiredDevice) {
+            // qDebug()<<"wiredItem:"<<wiredItem;
             if (wiredItem) {
                 auto info = wiredItem->getActiveWiredConnectionInfo();
-                if (!info.contains("Ip4"))
+                // qDebug() << "ActiveWiredConnectionInfo:" << wiredItem << info;
+                if (!info.contains("Ip4")) {
+                    textList << "BConnected, but don't contains IPv4.\n";
                     continue;
+                }
                 const QJsonObject ipv4 = info.value("Ip4").toObject();
-                if (!ipv4.contains("Address"))
+                if (!ipv4.contains("Address")) {
+                    textList << "BConnected, contains IPv4, but don't contains Address.\n";
                     continue;
+                }
                 if (m_connectedWiredDevice.size() == 1) {
                     strTips = tr("Wired connection: %1").arg(ipv4.value("Address").toString()) + '\n';
                 } else {
@@ -1297,6 +1326,7 @@ void NetworkItem::refreshTips()
         m_tipsWidget->setText(tr("Network cable unplugged"));
         break;
     }
+    // qDebug() << "<" << Q_FUNC_INFO << "m_tipsWidget->textList:" << m_tipsWidget->textList();
 }
 
 bool NetworkItem::isShowControlCenter()

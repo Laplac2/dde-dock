@@ -40,7 +40,7 @@ SystemTrayItem::SystemTrayItem(PluginsItemInterface *const pluginInter, const QS
     , m_popupAdjustDelayTimer(new QTimer(this))
     , m_itemKey(itemKey)
 {
-    qDebug() << "load tray plugins item: " << m_pluginInter->pluginName() << itemKey << m_centralWidget;
+    // qDebug() << "load tray plugins item: " << m_pluginInter->pluginName() << itemKey << m_centralWidget;
 
     m_centralWidget->setParent(this);
     m_centralWidget->setVisible(true);
@@ -391,6 +391,10 @@ void SystemTrayItem::showPopupWindow(QWidget *const content, const bool model)
     connect(popup, &DockPopupWindow::accept, this, &SystemTrayItem::popupWindowAccept, Qt::UniqueConnection);
 }
 
+/**
+ * @brief 显示预览窗口
+ *
+ */
 void SystemTrayItem::showHoverTips()
 {
     // another model popup window already exists

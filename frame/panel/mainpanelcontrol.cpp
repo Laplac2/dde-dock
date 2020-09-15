@@ -223,7 +223,7 @@ void MainPanelControl::updateMainPanelLayout()
     }
 
     resizeDesktopWidget();
-    resizeDockIcon();
+    resizeDockIcon(); // 更新任务栏布局
 }
 
 void MainPanelControl::addFixedAreaItem(int index, QWidget *wdg)
@@ -968,7 +968,7 @@ void MainPanelControl::resizeDockIcon()
         }
     }
 
-    // 总宽度
+    /* 任务栏总长度 */
     int totalLength = ((m_position == Position::Top) || (m_position == Position::Bottom)) ? width() : height();
     // 减去托盘间隔区域
     if (m_tray) {
@@ -977,7 +977,8 @@ void MainPanelControl::resizeDockIcon()
     // 减去3个分割线的宽度
     totalLength -= 3 * SPLITER_SIZE;
 
-    // 减去所有插件宽度，加上参与计算的4个插件宽度
+    /* 先用总长度减去插件区域的长度，再加上四个插件的长度，如果小于0,直接返回 */
+
     if ((m_position == Position::Top) || (m_position == Position::Bottom)) {
         totalLength -= m_pluginAreaWidget->width();
         if (trashPlugin) totalLength += trashPlugin->width();
@@ -996,7 +997,6 @@ void MainPanelControl::resizeDockIcon()
 
     if (totalLength < 0)
         return;
-
     // 参与计算的插件的个数（包含托盘和插件，垃圾桶，关机，屏幕键盘）
     int pluginCount = 0;
     if (m_tray) {

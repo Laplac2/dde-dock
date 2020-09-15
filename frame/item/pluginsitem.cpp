@@ -46,7 +46,7 @@ PluginsItem::PluginsItem(PluginsItemInterface *const pluginInter, const QString 
     , m_dragging(false)
     , m_gsettings(nullptr)
 {
-    qDebug() << "load plugins item: " << pluginInter->pluginName() << itemKey << m_centralWidget;
+    // qDebug() << "load plugins item: " << pluginInter->pluginName() << itemKey << m_centralWidget;
 
     m_centralWidget->setParent(this);
     m_centralWidget->setVisible(true);

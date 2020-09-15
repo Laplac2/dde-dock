@@ -156,7 +156,7 @@ const QString DatetimePlugin::itemContextMenu(const QString &itemKey)
     QList<QVariant> items;
     items.reserve(1);
 
-    QMap<QString, QVariant> settings;
+    QMap<QString, QVariant> settings; // 右键菜单设置项
     settings["itemId"] = "settings";
     if (m_centralWidget->is24HourFormat())
         settings["itemText"] = tr("12-hour time");

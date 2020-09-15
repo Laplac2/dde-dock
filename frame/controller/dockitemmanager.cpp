@@ -35,10 +35,10 @@ DockItemManager::DockItemManager(QObject *parent)
     , m_appInter(new DBusDock("com.deepin.dde.daemon.Dock", "/com/deepin/dde/daemon/Dock", QDBusConnection::sessionBus(), this))
     , m_pluginsInter(new DockPluginsController(this))
 {
-    //固定区域：启动器
+    /* 固定区域：启动器 */
     m_itemList.append(new LauncherItem);
 
-    // 应用区域
+    /* 应用区域，有几个应用，新建几个AppItem对象 */
     for (auto entry : m_appInter->entries()) {
         AppItem *it = new AppItem(entry);
         manageItem(it);
@@ -172,7 +172,7 @@ void DockItemManager::itemAdded(const QString &appDesktop, int idx)
 
 void DockItemManager::appItemAdded(const QDBusObjectPath &path, const int index)
 {
-    // 第一个是启动器
+    // 第一个是启动器，直接从第二个开始加
     int insertIndex = 1;
 
     // -1 for append to app list end

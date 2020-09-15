@@ -59,6 +59,7 @@ void VolumeSlider::mousePressEvent(QMouseEvent *e)
 
 void VolumeSlider::mouseMoveEvent(QMouseEvent *e)
 {
+    qDebug() << "VolumeSlider::mouseMoveEvent";
     const int value = minimum() + (double((maximum()) - minimum()) * e->x() / rect().width());
     const int normalized = std::max(std::min(maximum(), value), 0);
 

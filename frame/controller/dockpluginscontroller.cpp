@@ -144,7 +144,7 @@ void DockPluginsController::loadLocalPlugins()
         return;
     }
 
-    qDebug() << "using dock local plugins dir:" << pluginsDir;
+    // qDebug() << "using dock local plugins dir:" << pluginsDir;
 
     AbstractPluginsController::startLoader(new PluginLoader(pluginsDir, this));
 }
@@ -155,7 +155,7 @@ void DockPluginsController::loadSystemPlugins()
     if (!QDir(pluginsDir).exists()) {
         pluginsDir = "/usr/lib/dde-dock/plugins";
     }
-    qDebug() << "using dock plugins dir:" << pluginsDir;
+    // qDebug() << "using dock plugins dir:" << pluginsDir;
 
     AbstractPluginsController::startLoader(new PluginLoader(pluginsDir, this));
 }

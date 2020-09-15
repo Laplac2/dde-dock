@@ -182,6 +182,7 @@ void BluetoothItem::refreshTips()
 
 bool BluetoothItem::hasAdapter()
 {
+    // return true;
     return m_applet->hasAadapter();
 }
 

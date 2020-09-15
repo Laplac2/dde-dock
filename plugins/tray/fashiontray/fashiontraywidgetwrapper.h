@@ -70,7 +70,7 @@ private:
     void onTrayWidgetClicked();
 
 private:
-    QPointer<AbstractTrayWidget> m_absTrayWidget;
+    QPointer<AbstractTrayWidget> m_absTrayWidget; // 插件区域里的插件图标
     QVBoxLayout *m_layout;
 
     bool m_attention;

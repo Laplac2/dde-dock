@@ -444,7 +444,7 @@ void MainWindow::resetDragWindow()
         dockSize = this->height() == 0 ? rect.height() : this->height();
     }
 
-    /** FIX ME
+    /** FIXME
      * 作用：限制dockSize的值在40～100之间。
      * 问题1：如果dockSize为39，会导致dock的mainwindow高度变成99，显示的内容高度却是39。
      * 问题2：dockSize的值在这里不应该为39，但在高分屏上开启缩放后，拉高任务栏操作会概率出现。
@@ -453,7 +453,7 @@ void MainWindow::resetDragWindow()
     dockSize = qBound(MAINWINDOW_MIN_SIZE, dockSize, MAINWINDOW_MAX_SIZE);
 
     // 通知窗管和后端更新数据
-    m_multiScreenWorker->updateDaemonDockSize(dockSize);                                // 1.先更新任务栏高度
+    m_multiScreenWorker->updateDaemonDockSize(dockSize);                                // 1.先更新任务栏高度，这里发给窗管的是前端认为的大小，而不是真是像素大小
     m_multiScreenWorker->requestUpdateFrontendGeometry();                               // 2.再更新任务栏位置,保证先1再2
     m_multiScreenWorker->requestNotifyWindowManager();
     m_multiScreenWorker->requestUpdateRegionMonitor();                                  // 界面发生变化，应更新监控区域
@@ -507,6 +507,8 @@ void MainWindow::onMainWindowSizeChanged(QPoint offset)
     m_mainPanel->setFixedSize(newRect.size());
     setFixedSize(newRect.size());
     move(newRect.topLeft());
+
+    qDebug() << "--> MainWindowSizeChanged" << newRect.topLeft() << newRect << geometry();
 }
 
 void MainWindow::onDragFinished()

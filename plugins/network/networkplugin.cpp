@@ -119,6 +119,12 @@ QWidget *NetworkPlugin::itemWidget(const QString &itemKey)
     return nullptr;
 }
 
+/**
+ * @brief 鼠标放在Item上弹出的预览窗口
+ *
+ * @param itemKey
+ * @return QWidget*
+ */
 QWidget *NetworkPlugin::itemTipsWidget(const QString &itemKey)
 {
     if (itemKey == NETWORK_KEY) {
@@ -128,6 +134,12 @@ QWidget *NetworkPlugin::itemTipsWidget(const QString &itemKey)
     return nullptr;
 }
 
+/**
+ * @brief 鼠标点击Item弹出快捷设置窗口
+ *
+ * @param itemKey
+ * @return QWidget*
+ */
 QWidget *NetworkPlugin::itemPopupApplet(const QString &itemKey)
 {
     if (itemKey == NETWORK_KEY && m_hasDevice && !m_networkItem->isShowControlCenter()) {

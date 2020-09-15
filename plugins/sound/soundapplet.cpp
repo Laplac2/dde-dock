@@ -286,6 +286,7 @@ void SoundApplet::onVolumeChanged(double volume)
 
 void SoundApplet::volumeSliderValueChanged()
 {
+    qDebug() << "set sink volum" << m_volumeSlider->value();
     m_defSinkInter->SetVolume(m_volumeSlider->value() / 100.0f, true);
     if (m_defSinkInter->mute())
         m_defSinkInter->SetMuteQueued(false);
@@ -577,7 +578,7 @@ void SoundApplet::removeLastDevice()
         m_lastPort->setCardId(m_ports.at(0)->cardId());
         m_lastPort->setCardName(m_ports.at(0)->cardName());
         startRemovePort(m_ports.at(0)->id(), m_ports.at(0)->cardId());
-        qDebug() << "remove last output device";
+        // qDebug() << "remove last output device";
     }
 }
 
@@ -593,7 +594,7 @@ void SoundApplet::removeDisabledDevice(QString portId, unsigned int cardId)
         enableDevice(false);
         disableAllDevice();
     }
-    qDebug() << "remove disabled output device";
+    // qDebug() << "remove disabled output device";
 }
 
 void SoundApplet::haldleDbusSignal(const QDBusMessage &msg)
@@ -640,6 +641,3 @@ void SoundApplet::portEnableChange(unsigned int cardId, QString portId)
     m_deviceInfo = "";
     updateCradsInfo();
 }
-
-
-

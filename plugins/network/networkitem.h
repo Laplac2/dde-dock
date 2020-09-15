@@ -24,19 +24,16 @@ class NetworkItem : public QWidget
 {
     Q_OBJECT
 
-    enum PluginState
-    {
-        Unknow              = 0,
-        // A 无线 B 有线
+    enum PluginState {  // A 无线 B 有线
+        Unknow = 0,
         Disabled,
         Connected,
         Disconnected,
         Connecting,
-        //有线无线都失败
-        Failed,
+        Failed, //有线无线都失败
         ConnectNoInternet,
-//        Aenabled,
-//        Benabled,
+        // Aenabled,
+        // Benabled,
         Adisabled,
         Bdisabled,
         Aconnected,
@@ -49,8 +46,9 @@ class NetworkItem : public QWidget
         BconnectNoInternet,
         Afailed,
         Bfailed,
-        Nocable
+        Nocable // 没插网线
     };
+
 public:
     explicit NetworkItem(QWidget *parent = nullptr);
 
@@ -87,8 +85,8 @@ private:
     int getStrongestAp();
 
 private:
-    Dock::TipsWidget *m_tipsWidget;
-    QScrollArea *m_applet;
+    Dock::TipsWidget *m_tipsWidget; // 鼠标放在网络Item上的弹窗
+    QScrollArea *m_applet;          // 点击任务栏网络Item的弹窗
 
     QLabel *m_wiredTitle;
     DSwitchButton *m_switchWiredBtn;
@@ -114,7 +112,7 @@ private:
 
     QPixmap m_iconPixmap;
     PluginState m_pluginState;
-    QTimer *m_timer;
+    QTimer *m_timer; // refesh icons timer, 100ms
     QTimer *m_switchWireTimer;
 };
 

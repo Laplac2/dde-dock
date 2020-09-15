@@ -244,6 +244,7 @@ void WiredItem::refreshConnectivity()
 
 void WiredItem::deviceStateChanged(NetworkDevice::DeviceStatus state)
 {
+    // qDebug() << "deviceStateChanged" << state;
     m_deviceState = state;
     switch (state) {
         case NetworkDevice::Unknown:

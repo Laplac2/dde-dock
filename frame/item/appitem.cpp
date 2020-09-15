@@ -118,6 +118,7 @@ AppItem::AppItem(const QDBusObjectPath &entry, QWidget *parent)
     connect(this, &AppItem::requestUpdateEntryGeometries, this, &AppItem::updateWindowIconGeometries);
 
     updateWindowInfos(m_itemEntryInter->windowInfos());
+    // qDebug() << "--> AppItem::AppItem <---";
     refershIcon();
 
     connect(GSettingsByApp(), &QGSettings::changed, this, &AppItem::onGSettingsChanged);
@@ -130,6 +131,7 @@ AppItem::AppItem(const QDBusObjectPath &entry, QWidget *parent)
         m_curDate = QDate::currentDate();
         if (m_curDate.day() != m_lastShowDay) {
             m_lastShowDay = m_curDate.day();
+            // qDebug() << "---> m_refershIconTimer::timeout <---";
             refershIcon();
         }
     });
@@ -599,16 +601,20 @@ void AppItem::updateWindowInfos(const WindowInfoMap &info)
 
 void AppItem::refershIcon()
 {
+    // qDebug() << "---> AppItem::refershIcon <---";
     if (!isVisible())
         return;
 
     const QString icon = m_itemEntryInter->icon();
     const int iconSize = qMin(width(), height());
+    // qDebug() << "---> icon:" << m_itemEntryInter->icon() << "iconSize:" << iconSize;
 
     if (DockDisplayMode == Efficient)
         m_appIcon = ThemeAppIcon::getIcon(icon, iconSize * 0.7, devicePixelRatioF());
     else
         m_appIcon = ThemeAppIcon::getIcon(icon, iconSize * 0.8, devicePixelRatioF());
+
+    // qDebug() << "---> m_appIcon:" << m_appIcon.rect();
 
     if (!m_refershIconTimer->isActive() && m_itemEntryInter->icon() == "dde-calendar") {
         m_refershIconTimer->start();
@@ -665,7 +671,7 @@ void AppItem::playSwingEffect()
     stopSwingEffect();
 
     QPair<QGraphicsView *, QGraphicsItemAnimation *> pair =  SwingEffect(
-                                                                 this, m_appIcon, rect(), devicePixelRatioF());
+        this, m_appIcon, rect(), devicePixelRatioF());
 
     m_swingEffectView = pair.first;
     m_itemAnimation = pair.second;
@@ -712,8 +718,8 @@ void AppItem::onGSettingsChanged(const QString &key)
     }
 
     QGSettings *setting = m_itemEntryInter->isDocked()
-                          ? GSettingsByDockApp()
-                          : GSettingsByActiveApp();
+                              ? GSettingsByDockApp()
+                              : GSettingsByActiveApp();
 
     if (setting->keys().contains("enable")) {
         const bool isEnable = GSettingsByApp()->keys().contains("enable") && GSettingsByApp()->get("enable").toBool();
@@ -724,11 +730,11 @@ void AppItem::onGSettingsChanged(const QString &key)
 bool AppItem::checkGSettingsControl() const
 {
     QGSettings *setting = m_itemEntryInter->isDocked()
-                          ? GSettingsByDockApp()
-                          : GSettingsByActiveApp();
+                              ? GSettingsByDockApp()
+                              : GSettingsByActiveApp();
 
     return (setting->keys().contains("control") && setting->get("control").toBool()) ||
-           (GSettingsByApp()->keys().contains("control") && GSettingsByApp()->get("control").toBool());
+    (GSettingsByApp()->keys().contains("control") && GSettingsByApp()->get("control").toBool());
 }
 
 void AppItem::onThemeTypeChanged(DGuiApplicationHelper::ColorType themeType)

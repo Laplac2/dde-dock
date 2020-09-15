@@ -52,5 +52,6 @@ void DBusDockAdaptors::ReloadPlugins()
 
 QRect DBusDockAdaptors::geometry() const
 {
+    // qDebug() << "--> DBusDockAdaptors::geometry" << parent()->geometry();
     return parent()->geometry();
 }

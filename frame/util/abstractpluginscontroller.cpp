@@ -248,15 +248,15 @@ void AbstractPluginsController::loadPlugin(const QString &pluginFile, bool lasto
 
 void AbstractPluginsController::initPlugin(PluginsItemInterface *interface)
 {
-    qDebug() << objectName() << "init plugin: " << interface->pluginName();
+    // qDebug() << objectName() << "init plugin: " << interface->pluginName();
     interface->init(this);
-    qDebug() << objectName() << "init plugin finished: " << interface->pluginName();
+    // qDebug() << objectName() << "init plugin finished: " << interface->pluginName();
 }
 
 void AbstractPluginsController::refreshPluginSettings()
 {
     const QString &pluginSettings = m_dockDaemonInter->GetPluginSettings().value();
-    qDebug() << pluginSettings;
+    // qDebug() << pluginSettings;
     if (pluginSettings.isEmpty()) {
         qDebug() << "Error! get plugin settings from dbus failed!";
         return;

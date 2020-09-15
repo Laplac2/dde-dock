@@ -48,6 +48,7 @@ LauncherItem::LauncherItem(QWidget *parent)
 
 void LauncherItem::refershIcon()
 {
+    // qDebug() << "---> LauncherItem::refershIcon <---";
     const int iconSize = qMin(width(), height());
     if (DockDisplayMode == Efficient)
     {
@@ -59,7 +60,9 @@ void LauncherItem::refershIcon()
     update();
 }
 
-void LauncherItem::showEvent(QShowEvent* event) {
+void LauncherItem::showEvent(QShowEvent* event)
+{
+    // qDebug() << "---> LauncherItem::showEvent";
     QTimer::singleShot(0, this, [=] {
         onGSettingsChanged("enable");
     });
@@ -69,6 +72,7 @@ void LauncherItem::showEvent(QShowEvent* event) {
 
 void LauncherItem::paintEvent(QPaintEvent *e)
 {
+    // qDebug() << "---> LauncherItem::paintEvent";
     DockItem::paintEvent(e);
 
     if (!isVisible())
@@ -85,6 +89,7 @@ void LauncherItem::paintEvent(QPaintEvent *e)
 
 void LauncherItem::resizeEvent(QResizeEvent *e)
 {
+    // qDebug() << "---> LauncherItem::resizeEvent";
     DockItem::resizeEvent(e);
 
     refershIcon();
@@ -138,5 +143,5 @@ void LauncherItem::onGSettingsChanged(const QString& key) {
 bool LauncherItem::checkGSettingsControl() const
 {
     return m_gsettings->keys().contains("control")
-            && m_gsettings->get("control").toBool();
+           && m_gsettings->get("control").toBool();
 }

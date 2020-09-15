@@ -523,7 +523,7 @@ void MultiScreenWorker::onHideStateChanged()
         m_ds.updateDockedScreen(getValidScreen(m_position));
     }
 
-    qInfo() << "hidestate change:" << m_hideMode << m_hideState;
+    // qInfo() << "hidestate change:" << m_hideMode << m_hideState;
 
     if (m_hideMode == HideMode::KeepShowing
         || ((m_hideMode == HideMode::KeepHidden || m_hideMode == HideMode::SmartHide) && m_hideState == HideState::Show)) {
@@ -548,8 +548,8 @@ void MultiScreenWorker::onRequestUpdateRegionMonitor()
 {
     if (!m_registerKey.isEmpty()) {
 #ifdef QT_DEBUG
-        bool ret = m_eventInter->UnregisterArea(m_registerKey);
-        qDebug() << "取消唤起区域监听:" << ret;
+        // bool ret = m_eventInter->UnregisterArea(m_registerKey);
+        // qDebug() << "取消唤起区域监听:" << ret;
 #else
         m_eventInter->UnregisterArea(m_registerKey);
 #endif
@@ -558,8 +558,8 @@ void MultiScreenWorker::onRequestUpdateRegionMonitor()
 
     if (!m_extralRegisterKey.isEmpty()) {
 #ifdef QT_DEBUG
-        bool ret = m_extralEventInter->UnregisterArea(m_extralRegisterKey);
-        qDebug() << "取消任务栏外部区域监听:" << ret;
+        // bool ret = m_extralEventInter->UnregisterArea(m_extralRegisterKey);
+        // qDebug() << "取消任务栏外部区域监听:" << ret;
 #else
         m_extralEventInter->UnregisterArea(m_extralRegisterKey);
 #endif
@@ -617,9 +617,8 @@ void MultiScreenWorker::onRequestUpdateRegionMonitor()
 
         if (!m_monitorRectList.contains(rect)) {
             m_monitorRectList << rect;
-#ifdef QT_DEBUG
-            qDebug() << "监听区域：" << rect.x1 << rect.y1 << rect.x2 << rect.y2;
-#endif
+
+            qDebug() << "dock evoke area:" << QRect(rect.x1, rect.y1, rect.x2, rect.y2);
         }
     }
 
@@ -663,9 +662,8 @@ void MultiScreenWorker::onRequestUpdateRegionMonitor()
 
         if (!m_extralRectList.contains(rect)) {
             m_extralRectList << rect;
-#ifdef QT_DEBUG
-            qDebug() << "任务栏外部区域：" << rect.x1 << rect.y1 << rect.x2 << rect.y2;
-#endif
+
+            qDebug() << "dock outside area:" << QRect(rect.x1, rect.y1, rect.x2, rect.y2);
         }
     }
 
@@ -853,7 +851,7 @@ void MultiScreenWorker::updateMonitorDockedInfo()
         qFatal("shouldn't be here");
     }
 
-    qInfo() << "monitor info changed" << s1->rect() << s2->rect();
+    qInfo() << "monitor info:" << s1->rect() << s2->rect();
 
     // 先重置
     s1->dockPosition().reset();
@@ -1319,14 +1317,14 @@ void MultiScreenWorker::changeDockPosition(QString fromScreen, QString toScreen,
 
     // 如果更改了显示位置，在显示之前应该更新一下界面布局方向
     if (fromPos != toPos)
-        connect(ani1, &QVariantAnimation::finished, this, [ = ] {
+        connect(ani1, &QVariantAnimation::finished, this, [=] {
+            // 先清除原先的窗管任务栏区域
+            XcbMisc::instance()->clear_strut_partial(xcb_window_t(parent()->winId()));
 
-        // 先清除原先的窗管任务栏区域
-        XcbMisc::instance()->clear_strut_partial(xcb_window_t(parent()->winId()));
-
-        // 隐藏后需要通知界面更新布局方向
-        emit requestUpdateLayout();
-    });
+            // 隐藏后需要通知界面更新布局方向
+            emit requestUpdateLayout();
+            // qDebug() << "---> requestUpdateLayout change position";
+        });
 
     connect(group, &QVariantAnimation::finished, this, [ = ] {
         m_aniStart = false;
@@ -1400,8 +1398,7 @@ void MultiScreenWorker::resetDockScreen()
         }
         if (!primaryMonitor->dockPosition().docked(position())) {
             foreach (auto monitor, monitorList) {
-                if (monitor->name() != m_ds.current()
-                        && monitor->dockPosition().docked(position())) {
+                if (monitor->name() != m_ds.current() && monitor->dockPosition().docked(position())) {
                     m_ds.updateDockedScreen(monitor->name());
                     qInfo() << "update dock screen: " << monitor->name();
                 }
@@ -1807,7 +1804,7 @@ void MultiScreenWorker::onTouchRelease(int type, int x, int y, const QString &ke
 void MultiScreenWorker::tryToShowDock(int eventX, int eventY)
 {
     if (m_draging || m_aniStart) {
-        qWarning() << "dock is draging or animation is running";
+        // qWarning() << "dock is draging or animation is running";
         return;
     }
 

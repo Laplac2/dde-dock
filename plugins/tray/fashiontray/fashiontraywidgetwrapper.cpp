@@ -123,6 +123,7 @@ void FashionTrayWidgetWrapper::paintEvent(QPaintEvent *event)
         QPainterPath path;
 
         int minSize = std::min(width(), height());
+        // qDebug() << "---> FashionTrayWidgetWrapper::paintEvent QRect" << width() << height();
         QRect rc(0, 0, minSize, minSize);
         rc.moveTo(rect().center() - rc.center());
 
@@ -170,6 +171,7 @@ void FashionTrayWidgetWrapper::dragEnterEvent(QDragEnterEvent *event)
 
 void FashionTrayWidgetWrapper::enterEvent(QEvent *event)
 {
+    // qDebug() << "---> FashionTrayWidgetWrapper::enterEvent";
     m_hover = true;
     update();
 
