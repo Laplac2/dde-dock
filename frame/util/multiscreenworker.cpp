@@ -571,7 +571,7 @@ void MultiScreenWorker::onRequestUpdateRegionMonitor()
     }
 
     const int flags = Motion | Button | Key;
-    const int evokeAreaSize = static_cast<int>(15 * qApp->devicePixelRatio());
+    const int evokeAreaSize = static_cast<int>(10 * qApp->devicePixelRatio());
     const int touchEvokeAreaSize = 100 + WINDOWMARGIN;
     const int realDockSize = static_cast<int>((m_displayMode == DisplayMode::Fashion ? m_dockInter->windowSizeFashion() + 2 * 10 : m_dockInter->windowSizeEfficient()) * qApp->devicePixelRatio());
 
