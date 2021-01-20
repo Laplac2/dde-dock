@@ -58,17 +58,17 @@ MainPanelControl::MainPanelControl(QWidget *parent)
     : QWidget(parent)
     , m_mainPanelLayout(new QBoxLayout(QBoxLayout::LeftToRight, this))
     , m_fixedAreaWidget(new QWidget(this))
-    , m_fixedAreaLayout(new QBoxLayout(QBoxLayout::LeftToRight))
+    , m_fixedAreaLayout(new QBoxLayout(QBoxLayout::LeftToRight, m_fixedAreaWidget))
     , m_fixedSpliter(new QLabel(this))
     , m_appAreaWidget(new QWidget(this))
     , m_appAreaSonWidget(new QWidget(this))
-    , m_appAreaSonLayout(new QBoxLayout(QBoxLayout::LeftToRight))
+    , m_appAreaSonLayout(new QBoxLayout(QBoxLayout::LeftToRight, m_appAreaSonWidget))
     , m_appSpliter(new QLabel(this))
     , m_trayAreaWidget(new QWidget(this))
-    , m_trayAreaLayout(new QBoxLayout(QBoxLayout::LeftToRight))
+    , m_trayAreaLayout(new QBoxLayout(QBoxLayout::LeftToRight, m_trayAreaWidget))
     , m_traySpliter(new QLabel(this))
     , m_pluginAreaWidget(new QWidget(this))
-    , m_pluginLayout(new QBoxLayout(QBoxLayout::LeftToRight))
+    , m_pluginAreaLayout(new QBoxLayout(QBoxLayout::LeftToRight, m_pluginAreaWidget))
     , m_desktopWidget(new DesktopWidget(this))
     , m_position(Position::Bottom)
     , m_placeholderItem(nullptr)
@@ -80,21 +80,15 @@ MainPanelControl::MainPanelControl(QWidget *parent)
 {
     initUi();
     updateMainPanelLayout();
+
     setAcceptDrops(true);
     setMouseTracking(true);
     m_desktopWidget->setMouseTracking(true);
-    m_desktopWidget->setObjectName("showdesktoparea");
 
     m_appAreaWidget->installEventFilter(this);
     m_appAreaSonWidget->installEventFilter(this);
     m_trayAreaWidget->installEventFilter(this);
     m_desktopWidget->installEventFilter(this);
-
-    //在设置每条线大小前，应该设置fixedsize(0,0)
-    //应为paintEvent函数会先调用设置背景颜色，大小为随机值
-    m_fixedSpliter->setFixedSize(0,0);
-    m_appSpliter ->setFixedSize(0,0);
-    m_traySpliter->setFixedSize(0,0);
 }
 
 MainPanelControl::~MainPanelControl()
@@ -105,44 +99,44 @@ void MainPanelControl::initUi()
 {
     /* 固定区域 */
     m_fixedAreaWidget->setObjectName("fixedarea");
-    m_fixedAreaWidget->setLayout(m_fixedAreaLayout);
     m_fixedAreaLayout->setSpacing(0);
     m_fixedAreaLayout->setContentsMargins(0, 0, 0, 0);
     m_mainPanelLayout->addWidget(m_fixedAreaWidget);
 
     m_fixedSpliter->setObjectName("spliter_fix");
+    m_fixedSpliter->setFixedSize(0, 0);
     m_mainPanelLayout->addWidget(m_fixedSpliter);
 
     /* 应用程序区域 */
     m_appAreaWidget->setAccessibleName("AppFullArea");
     m_mainPanelLayout->addWidget(m_appAreaWidget);
     m_appAreaSonWidget->setObjectName("apparea");
-    m_appAreaSonWidget->setLayout(m_appAreaSonLayout);
     m_appAreaSonLayout->setSpacing(0);
     m_appAreaSonLayout->setContentsMargins(0, 0, 0, 0);
 
     m_appSpliter->setObjectName("spliter_app");
+    m_appSpliter->setFixedSize(0, 0);
     m_mainPanelLayout->addWidget(m_appSpliter);
 
     /* 托盘区域 */
     m_trayAreaWidget->setObjectName("trayarea");
-    m_trayAreaWidget->setLayout(m_trayAreaLayout);
     m_trayAreaLayout->setSpacing(0);
     m_trayAreaLayout->setContentsMargins(0, 10, 0, 10);
     m_mainPanelLayout->addWidget(m_trayAreaWidget);
 
     m_traySpliter->setObjectName("spliter_tray");
+    m_traySpliter->setFixedSize(0, 0);
     m_mainPanelLayout->addWidget(m_traySpliter);
 
     /* 插件区域 */
     m_pluginAreaWidget->setObjectName("pluginarea");
-    m_pluginAreaWidget->setLayout(m_pluginLayout);
-    m_pluginLayout->setSpacing(10);
-    m_pluginLayout->setContentsMargins(0, 0, 0, 0);
+    m_pluginAreaLayout->setSpacing(10);
+    m_pluginAreaLayout->setContentsMargins(0, 0, 0, 0);
     m_mainPanelLayout->addWidget(m_pluginAreaWidget);
 
     /* 桌面预览 */
     m_mainPanelLayout->addWidget(m_desktopWidget);
+    m_desktopWidget->setObjectName("showdesktoparea");
 
     m_mainPanelLayout->setSpacing(0);
     m_mainPanelLayout->setContentsMargins(0, 0, 0, 0);
@@ -194,11 +188,11 @@ void MainPanelControl::updateMainPanelLayout()
         m_trayAreaWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
         m_mainPanelLayout->setDirection(QBoxLayout::LeftToRight);
         m_fixedAreaLayout->setDirection(QBoxLayout::LeftToRight);
-        m_pluginLayout->setDirection(QBoxLayout::LeftToRight);
+        m_pluginAreaLayout->setDirection(QBoxLayout::LeftToRight);
         m_trayAreaLayout->setDirection(QBoxLayout::LeftToRight);
         m_appAreaSonLayout->setDirection(QBoxLayout::LeftToRight);
         m_trayAreaLayout->setContentsMargins(0, 10, 0, 10);
-        m_pluginLayout->setContentsMargins(10, 0, 10, 0);
+        m_pluginAreaLayout->setContentsMargins(10, 0, 10, 0);
         break;
     case Position::Right:
     case Position::Left:
@@ -208,11 +202,11 @@ void MainPanelControl::updateMainPanelLayout()
         m_trayAreaWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         m_mainPanelLayout->setDirection(QBoxLayout::TopToBottom);
         m_fixedAreaLayout->setDirection(QBoxLayout::TopToBottom);
-        m_pluginLayout->setDirection(QBoxLayout::TopToBottom);
+        m_pluginAreaLayout->setDirection(QBoxLayout::TopToBottom);
         m_trayAreaLayout->setDirection(QBoxLayout::TopToBottom);
         m_appAreaSonLayout->setDirection(QBoxLayout::TopToBottom);
         m_trayAreaLayout->setContentsMargins(10, 0, 10, 0);
-        m_pluginLayout->setContentsMargins(0, 10, 0, 10);
+        m_pluginAreaLayout->setContentsMargins(0, 10, 0, 10);
         break;
     }
 
@@ -252,7 +246,7 @@ void MainPanelControl::addPluginAreaItem(int index, QWidget *wdg)
     //因此在处理插件图标时，需要通过两层布局判断是否为需要的插件，例如拖动插件位置等判断
     QBoxLayout * boxLayout = new QBoxLayout(QBoxLayout::LeftToRight);
     boxLayout->addWidget(wdg, 0, Qt::AlignCenter);
-    m_pluginLayout->insertLayout(index, boxLayout, 0);
+    m_pluginAreaLayout->insertLayout(index, boxLayout, 0);
 }
 
 void MainPanelControl::removeFixedAreaItem(QWidget *wdg)
@@ -274,12 +268,12 @@ void MainPanelControl::removePluginAreaItem(QWidget *wdg)
 {
     //因为日期时间插件大小和其他插件有异，为了方便设置边距，各插件中增加一层布局
     //因此remove插件图标时，需要从多的一层布局中取widget进行判断是否需要移除的插件
-    for (int i = 0; i < m_pluginLayout->count(); ++i) {
-        QLayoutItem *layoutItem = m_pluginLayout->itemAt(i);
+    for (int i = 0; i < m_pluginAreaLayout->count(); ++i) {
+        QLayoutItem *layoutItem = m_pluginAreaLayout->itemAt(i);
         QLayout *boxLayout = layoutItem->layout();
         if (boxLayout && boxLayout->itemAt(0)->widget() == wdg) {
             boxLayout->removeWidget(wdg);
-            m_pluginLayout->removeItem(layoutItem);
+            m_pluginAreaLayout->removeItem(layoutItem);
         }
     }
 }
@@ -389,8 +383,8 @@ void MainPanelControl::moveItem(DockItem *sourceItem, DockItem *targetItem)
     else if (targetItem->itemType() == DockItem::Plugins){
         //因为日期时间插件大小和其他插件大小有异，为了设置边距，在各插件中增加了一层布局
         //因此有拖动图标时，需要从多的一层布局中判断是否相同插件而获取插件位置顺序
-        for (int i = 0; i < m_pluginLayout->count(); ++i) {
-            QLayout *layout = m_pluginLayout->itemAt(i)->layout();
+        for (int i = 0; i < m_pluginAreaLayout->count(); ++i) {
+            QLayout *layout = m_pluginAreaLayout->itemAt(i)->layout();
             if (layout && layout->itemAt(0)->widget() == targetItem) {
                 idx = i;
                 break;
@@ -871,8 +865,8 @@ void MainPanelControl::moveAppSonWidget()
 
 void MainPanelControl::updatePluginsLayout()
 {
-    for (int i = 0; i < m_pluginLayout->count(); ++i) {
-        QLayout *layout = m_pluginLayout->itemAt(i)->layout();
+    for (int i = 0; i < m_pluginAreaLayout->count(); ++i) {
+        QLayout *layout = m_pluginAreaLayout->itemAt(i)->layout();
         if (layout) {
             PluginsItem *pItem = static_cast<PluginsItem *>(layout->itemAt(0)->widget());
             if (pItem && pItem->sizeHint().width() != -1) {
@@ -942,10 +936,10 @@ void MainPanelControl::resizeDockIcon()
 
     //因为日期时间大小和其他插件大小有异，为了设置边距，在各插件中增加了一层布局
     //因此需要通过多一层布局来获取各插件
-    for (int i = 0; i < m_pluginLayout->count(); ++ i) {
-        QLayout *layout = m_pluginLayout->itemAt(i)->layout();
+    for (int i = 0; i < m_pluginAreaLayout->count(); ++i) {
+        QLayout *layout = m_pluginAreaLayout->itemAt(i)->layout();
         if (layout) {
-            PluginsItem *w = static_cast<PluginsItem *>(m_pluginLayout->itemAt(i)->widget());
+            PluginsItem *w = static_cast<PluginsItem *>(m_pluginAreaLayout->itemAt(i)->widget());
             if (w) {
                 if (w->pluginName() == "trash") {
                     trashPlugin = w;
@@ -1078,8 +1072,8 @@ void MainPanelControl::calcuDockIconSize(int w, int h, PluginsItem *trashPlugin,
     //因此需要通过多一层布局来获取各插件
     if ((m_position == Position::Top) || (m_position == Position::Bottom)) {
         // 三方插件
-        for (int i = 0; i < m_pluginLayout->count(); ++ i) {
-            QLayout *layout = m_pluginLayout->itemAt(i)->layout();
+        for (int i = 0; i < m_pluginAreaLayout->count(); ++i) {
+            QLayout *layout = m_pluginAreaLayout->itemAt(i)->layout();
             if (layout) {
                 PluginsItem *pItem = static_cast<PluginsItem *>(layout->itemAt(0)->widget());
                 if (pItem) {
@@ -1091,8 +1085,8 @@ void MainPanelControl::calcuDockIconSize(int w, int h, PluginsItem *trashPlugin,
         }
     } else {
         // 三方插件
-        for (int i = 0; i < m_pluginLayout->count(); ++ i) {
-            QLayout *layout =  m_pluginLayout->itemAt(i)->layout();
+        for (int i = 0; i < m_pluginAreaLayout->count(); ++i) {
+            QLayout *layout = m_pluginAreaLayout->itemAt(i)->layout();
             if (layout) {
                 PluginsItem *pItem = static_cast<PluginsItem *>(layout->itemAt(0)->widget());
                 if (pItem) {
@@ -1124,8 +1118,8 @@ void MainPanelControl::calcuDockIconSize(int w, int h, PluginsItem *trashPlugin,
 
     //因为日期时间插件大小和其他插件大小有异，需要单独设置各插件的边距
     //而不对日期时间插件设置边距
-    for (int i = 0; i < m_pluginLayout->count(); ++ i) {
-        QLayout *layout = m_pluginLayout->itemAt(i)->layout();
+    for (int i = 0; i < m_pluginAreaLayout->count(); ++i) {
+        QLayout *layout = m_pluginAreaLayout->itemAt(i)->layout();
         if (layout) {
             PluginsItem *pItem = static_cast<PluginsItem *>(layout->itemAt(0)->widget());
 

@@ -131,7 +131,7 @@ private:
     QBoxLayout *m_trayAreaLayout;   //
     QLabel *m_traySpliter;          // 托盘区域与插件区域间的分割线
     QWidget *m_pluginAreaWidget;    // 插件区域
-    QBoxLayout *m_pluginLayout;     //
+    QBoxLayout *m_pluginAreaLayout;     //
     DesktopWidget *m_desktopWidget; // 桌面预览区域
 
     Position m_position;
