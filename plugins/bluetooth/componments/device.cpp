@@ -49,7 +49,7 @@ Device::Device(QObject *parent)
     , m_trusted(false)
     , m_connecting(false)
     , m_rssi(0)
-    , m_state(StateUnavailable)
+    , m_state(State::Disconnected)
     , m_connectState(false)
 {
     m_time = static_cast<int>(QDateTime::currentDateTime().toTime_t());

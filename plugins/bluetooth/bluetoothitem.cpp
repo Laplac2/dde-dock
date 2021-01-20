@@ -45,7 +45,7 @@ BluetoothItem::BluetoothItem(QWidget *parent)
     : QWidget(parent)
     , m_tipsLabel(new TipsWidget(this))
     , m_applet(new BluetoothApplet(this))
-    , m_devState(Device::State::StateUnavailable)
+    , m_devState(Device::State::Disconnected)
     , m_adapterPowered(m_applet->poweredInitState())
 {
     setAccessibleName("BluetoothPluginItem");
@@ -134,15 +134,15 @@ void BluetoothItem::refreshIcon()
 
     if (m_adapterPowered) {
         switch (m_devState) {
-            case Device::StateConnected:
-                stateString = "active";
-                break;
-            case Device::StateAvailable: {
-                return ;
-            }
-            case Device::StateUnavailable: {
-                stateString = "disable";
-            }      break;
+        case Device::Connected:
+            stateString = "active";
+            break;
+        case Device::Connecting:
+        case Device::Disconnecting:
+            return;
+        case Device::Disconnected:
+            stateString = "disable";
+            break;
         }
     } else {
         stateString = "disable";
@@ -163,24 +163,22 @@ void BluetoothItem::refreshIcon()
 void BluetoothItem::refreshTips()
 {
     QString tipsText;
+    QStringList textList;
 
     if (m_adapterPowered) {
         switch (m_devState) {
-        case Device::StateConnected: {
-            QStringList textList;
+        case Device::Connected:
             for (QString devName : m_applet->connectedDevicesName()) {
                 textList << tr("%1 connected").arg(devName);
             }
             m_tipsLabel->setTextList(textList);
             return;
-        }
-        case Device::StateAvailable: {
+        case Device::Connecting:
             tipsText = tr("Connecting...");
-        }
-            break ;
-        case Device::StateUnavailable: {
+            break;
+        case Device::Disconnecting:
+        case Device::Disconnected:
             tipsText = tr("Bluetooth");
-        }
             break;
         }
     } else {

@@ -98,19 +98,23 @@ void BluetoothDeviceItem::updateIconTheme(DGuiApplicationHelper::ColorType type)
 void BluetoothDeviceItem::updateDeviceState(Device::State state)
 {
     m_labelAction->setText(m_device->name());
-    if (state == Device::StateAvailable) {
+    switch (state) {
+    case Device::State::Connecting:
         m_loading->start();
         m_stateAction->setVisible(true);
         m_standarditem->setCheckState(Qt::Unchecked);
-    } else if (state == Device::StateConnected){
+        break;
+    case Device::State::Connected:
         m_loading->stop();
         m_stateAction->setVisible(false);
         m_standarditem->setCheckState(Qt::Checked);
         emit requestTopDeviceItem(m_standarditem);
-    } else {
+        break;
+    default:
         m_loading->stop();
         m_stateAction->setVisible(false);
         m_standarditem->setCheckState(Qt::Unchecked);
+        break;
     }
     emit deviceStateChanged(m_device);
 }
@@ -182,7 +186,7 @@ QStringList BluetoothAdapterItem::connectedDevicesName()
 {
     QStringList devsName;
     for (BluetoothDeviceItem *devItem : m_deviceItems) {
-        if (devItem && devItem->device()->state() == Device::StateConnected) {
+        if (devItem && devItem->device()->state() == Device::State::Connected) {
             devsName << devItem->device()->name();
         }
     }
