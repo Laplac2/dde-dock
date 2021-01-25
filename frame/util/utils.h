@@ -58,19 +58,25 @@ inline QScreen * screenAt(const QPoint &point) {
     return nullptr;
 }
 
-//!!! 注意:这里传入的QPoint是未计算缩放的
-inline QScreen * screenAtByScaled(const QPoint &point) {
+/**
+ * @brief           获取任务栏所在的屏幕
+ *
+ * @param point     任务栏左上角坐标
+ * @return QScreen* 任务栏所在的屏幕
+ */
+inline QScreen *screenAtByScaled(const QPoint &point)
+{
+    QRect screenGeometry;
     for (QScreen *screen : qApp->screens()) {
-        const QRect r { screen->geometry() };
-        QRect rect { r.topLeft(), r.size() * screen->devicePixelRatio() };
-        if (rect.contains(point)) {
+        screenGeometry = screen->geometry();
+        if (screenGeometry.contains(point)) {
             return screen;
         }
     }
 
     return nullptr;
 }
-    
+
 inline bool isSettingConfigured(const QString& id, const QString& path, const QString& keyName) {
     if (!QGSettings::isSchemaInstalled(id.toUtf8())) {
         return false;
