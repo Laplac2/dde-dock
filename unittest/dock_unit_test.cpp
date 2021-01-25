@@ -43,14 +43,6 @@ DockUnitTest::~DockUnitTest()
 {
 }
 
-void DockUnitTest::SetUp()
-{
-}
-
-void DockUnitTest::TearDown()
-{
-}
-
 const DockRect DockUnitTest::dockGeometry()
 {
     DockRect dockRect;

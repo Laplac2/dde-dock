@@ -30,19 +30,17 @@
 
 using DBusDock = com::deepin::dde::daemon::Dock;
 
-class DockUnitTest : public QObject, public ::testing::Test
+class DockUnitTest : public QObject
+    , public ::testing::Test
 {
     Q_OBJECT
 
 public:
     DockUnitTest();
-    virtual ~DockUnitTest();
-    virtual void SetUp();
-    virtual void TearDown();
-
-public:
-    const DockRect dockGeometry();                               // 获取任务栏实际位置
-    const DockRect frontendWindowRect();                         // 后端记录的任务栏前端界面位置(和实际位置不一定对应)
+    ~DockUnitTest();
+    
+    const DockRect dockGeometry();       // 获取任务栏实际位置
+    const DockRect frontendWindowRect(); // 后端记录的任务栏前端界面位置(和实际位置不一定对应)
     void setPosition(Dock::Position pos);
 };
 
