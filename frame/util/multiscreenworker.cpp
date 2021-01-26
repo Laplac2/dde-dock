@@ -544,174 +544,123 @@ void MultiScreenWorker::onOpacityChanged(const double value)
     emit opacityChanged(quint8(value * 255));
 }
 
+/**
+ * @brief 更新任务栏唤起区域。
+ * 触发时机：屏幕大小、屏幕坐标、屏幕数量、任务栏位置、任务栏模式发生变化
+ */
 void MultiScreenWorker::onRequestUpdateRegionMonitor()
 {
+    MonitRect evokeAreaRect;
+    MonitRect extralAreaRect;
+    MonitRect touchEvokeAreaRect;
+
+    /* 取消唤起区域监听 */
     if (!m_registerKey.isEmpty()) {
-#ifdef QT_DEBUG
-        bool ret = m_eventInter->UnregisterArea(m_registerKey);
-        qDebug() << "取消唤起区域监听:" << ret;
-#else
         m_eventInter->UnregisterArea(m_registerKey);
-#endif
         m_registerKey.clear();
     }
-
+    /* 取消任务栏外部区域监听 */
     if (!m_extralRegisterKey.isEmpty()) {
-#ifdef QT_DEBUG
-        bool ret = m_extralEventInter->UnregisterArea(m_extralRegisterKey);
-        qDebug() << "取消任务栏外部区域监听:" << ret;
-#else
         m_extralEventInter->UnregisterArea(m_extralRegisterKey);
-#endif
         m_extralRegisterKey.clear();
     }
-
+    /* 取消触控区域监听 */
     if (!m_touchRegisterKey.isEmpty()) {
         m_touchEventInter->UnregisterArea(m_touchRegisterKey);
         m_touchRegisterKey.clear();
     }
 
-    const static int flags = Motion | Button | Key;
-    const static int monitorHeight = static_cast<int>(15 * qApp->devicePixelRatio());
-    // 后端认为的任务栏大小(无缩放因素影响)
-    const int realDockSize = int((m_displayMode == DisplayMode::Fashion ? m_dockInter->windowSizeFashion() + 2 * 10 /*上下的边距各10像素*/ : m_dockInter->windowSizeEfficient()) * qApp->devicePixelRatio());
+    const int flags = Motion | Button | Key;
+    const int evokeAreaSize = static_cast<int>(15 * qApp->devicePixelRatio());
+    const int touchEvokeAreaSize = 100 + WINDOWMARGIN;
+    const int realDockSize = static_cast<int>((m_displayMode == DisplayMode::Fashion ? m_dockInter->windowSizeFashion() + 2 * 10 : m_dockInter->windowSizeEfficient()) * qApp->devicePixelRatio());
 
-    // 任务栏唤起区域
     m_monitorRectList.clear();
-    foreach (Monitor *inter, m_mtrInfo.validMonitor()) {
-        // 屏幕不可用或此位置不可停靠时，不用监听这块区域
-        if (!inter->enable() || !inter->dockPosition().docked(m_position))
-            continue;
-
-        MonitRect rect;
-        switch (m_position) {
-        case Top: {
-            rect.x1 = inter->x();
-            rect.y1 = inter->y();
-            rect.x2 = inter->x() + inter->w();
-            rect.y2 = inter->y() + monitorHeight;
-        }
-        break;
-        case Bottom: {
-            rect.x1 = inter->x();
-            rect.y1 = inter->y() + inter->h() - monitorHeight;
-            rect.x2 = inter->x() + inter->w();
-            rect.y2 = inter->y() + inter->h();
-        }
-        break;
-        case Left: {
-            rect.x1 = inter->x();
-            rect.y1 = inter->y();
-            rect.x2 = inter->x() + monitorHeight;
-            rect.y2 = inter->y() + inter->h();
-        }
-        break;
-        case Right: {
-            rect.x1 = inter->x() + inter->w() - monitorHeight;
-            rect.y1 = inter->y();
-            rect.x2 = inter->x() + inter->w();
-            rect.y2 = inter->y() + inter->h();
-        }
-        break;
-        }
-
-        if (!m_monitorRectList.contains(rect)) {
-            m_monitorRectList << rect;
-#ifdef QT_DEBUG
-            qDebug() << "监听区域：" << rect.x1 << rect.y1 << rect.x2 << rect.y2;
-#endif
-        }
-    }
-
     m_extralRectList.clear();
-    foreach (Monitor *inter, m_mtrInfo.validMonitor()) {
-        // 屏幕不可用或此位置不可停靠时，不用监听这块区域
-        if (!inter->enable() || !inter->dockPosition().docked(m_position))
-            continue;
-
-        MonitRect rect;
-        switch (m_position) {
-        case Top: {
-            rect.x1 = inter->x();
-            rect.y1 = inter->y() + realDockSize;
-            rect.x2 = inter->x() + inter->w();
-            rect.y2 = inter->y() + inter->h();
-        }
-        break;
-        case Bottom: {
-            rect.x1 = inter->x();
-            rect.y1 = inter->y();
-            rect.x2 = inter->x() + inter->w();
-            rect.y2 = inter->y() + inter->h() - realDockSize;
-        }
-        break;
-        case Left: {
-            rect.x1 = inter->x() + realDockSize;
-            rect.y1 = inter->y();
-            rect.x2 = inter->x() + inter->w();
-            rect.y2 = inter->y() + inter->h();
-        }
-        break;
-        case Right: {
-            rect.x1 = inter->x();
-            rect.y1 = inter->y();
-            rect.x2 = inter->x() + inter->w() - realDockSize;
-            rect.y2 = inter->y() + inter->h();
-        }
-        break;
-        }
-
-        if (!m_extralRectList.contains(rect)) {
-            m_extralRectList << rect;
-#ifdef QT_DEBUG
-            qDebug() << "任务栏外部区域：" << rect.x1 << rect.y1 << rect.x2 << rect.y2;
-#endif
-        }
-    }
-
-    // 触屏监控高度固定调整为最大任务栏高度100+任务栏与屏幕边缘间距
-    const int monitHeight = 100 + WINDOWMARGIN;
-    // 任务栏触屏唤起区域
     m_touchRectList.clear();
-    foreach (Monitor *inter, m_mtrInfo.validMonitor()) {
-        // 屏幕不可用或此位置不可停靠时，不用监听这块区域
-        if (!inter->enable() || !inter->dockPosition().docked(m_position))
+
+    for (Monitor *monitor : m_mtrInfo.validMonitor()) {
+        if (!monitor->enable() || !monitor->dockPosition().docked(m_position)) {
             continue;
-
-        MonitRect touchRect;
+        }
         switch (m_position) {
-        case Top: {
-            touchRect.x1 = inter->x();
-            touchRect.y1 = inter->y();
-            touchRect.x2 = inter->x() + inter->w();
-            touchRect.y2 = inter->y() + monitHeight;
-        }
-        break;
-        case Bottom: {
-            touchRect.x1 = inter->x();
-            touchRect.y1 = inter->y() + inter->h() - monitHeight;
-            touchRect.x2 = inter->x() + inter->w();
-            touchRect.y2 = inter->y() + inter->h();
-        }
-        break;
-        case Left: {
-            touchRect.x1 = inter->x();
-            touchRect.y1 = inter->y();
-            touchRect.x2 = inter->x() + monitHeight;
-            touchRect.y2 = inter->y() + inter->h();
-        }
-        break;
-        case Right: {
-            touchRect.x1 = inter->x() + inter->w() - monitHeight;
-            touchRect.y1 = inter->y();
-            touchRect.x2 = inter->x() + inter->w();
-            touchRect.y2 = inter->y() + inter->h();
-        }
-        break;
+        case Position::Top:
+            evokeAreaRect.x1 = monitor->x();
+            evokeAreaRect.y1 = monitor->y();
+            evokeAreaRect.x2 = monitor->x() + monitor->w();
+            evokeAreaRect.y2 = monitor->y() + evokeAreaSize;
+
+            extralAreaRect.x1 = monitor->x();
+            extralAreaRect.y1 = monitor->y() + realDockSize;
+            extralAreaRect.x2 = monitor->x() + monitor->w();
+            extralAreaRect.y2 = monitor->y() + monitor->h();
+
+            touchEvokeAreaRect.x1 = monitor->x();
+            touchEvokeAreaRect.y1 = monitor->y();
+            touchEvokeAreaRect.x2 = monitor->x() + monitor->w();
+            touchEvokeAreaRect.y2 = monitor->y() + touchEvokeAreaSize;
+            break;
+        case Position::Bottom:
+            evokeAreaRect.x1 = monitor->x();
+            evokeAreaRect.y1 = monitor->y() + monitor->h() - evokeAreaSize;
+            evokeAreaRect.x2 = monitor->x() + monitor->w();
+            evokeAreaRect.y2 = monitor->y() + monitor->h();
+
+            extralAreaRect.x1 = monitor->x();
+            extralAreaRect.y1 = monitor->y();
+            extralAreaRect.x2 = monitor->x() + monitor->w();
+            extralAreaRect.y2 = monitor->y() + monitor->h() - realDockSize;
+
+            touchEvokeAreaRect.x1 = monitor->x();
+            touchEvokeAreaRect.y1 = monitor->y() + monitor->h() - touchEvokeAreaSize;
+            touchEvokeAreaRect.x2 = monitor->x() + monitor->w();
+            touchEvokeAreaRect.y2 = monitor->y() + monitor->h();
+            break;
+        case Position::Left:
+            evokeAreaRect.x1 = monitor->x();
+            evokeAreaRect.y1 = monitor->y();
+            evokeAreaRect.x2 = monitor->x() + evokeAreaSize;
+            evokeAreaRect.y2 = monitor->y() + monitor->h();
+
+            extralAreaRect.x1 = monitor->x() + realDockSize;
+            extralAreaRect.y1 = monitor->y();
+            extralAreaRect.x2 = monitor->x() + monitor->w();
+            extralAreaRect.y2 = monitor->y() + monitor->h();
+
+            touchEvokeAreaRect.x1 = monitor->x();
+            touchEvokeAreaRect.y1 = monitor->y();
+            touchEvokeAreaRect.x2 = monitor->x() + touchEvokeAreaSize;
+            touchEvokeAreaRect.y2 = monitor->y() + monitor->h();
+            break;
+        case Position::Right:
+            evokeAreaRect.x1 = monitor->x() + monitor->w() - evokeAreaSize;
+            evokeAreaRect.y1 = monitor->y();
+            evokeAreaRect.x2 = monitor->x() + monitor->w();
+            evokeAreaRect.y2 = monitor->y() + monitor->h();
+
+            extralAreaRect.x1 = monitor->x();
+            extralAreaRect.y1 = monitor->y();
+            extralAreaRect.x2 = monitor->x() + monitor->w() - realDockSize;
+            extralAreaRect.y2 = monitor->y() + monitor->h();
+
+            touchEvokeAreaRect.x1 = monitor->x() + monitor->w() - touchEvokeAreaSize;
+            touchEvokeAreaRect.y1 = monitor->y();
+            touchEvokeAreaRect.x2 = monitor->x() + monitor->w();
+            touchEvokeAreaRect.y2 = monitor->y() + monitor->h();
+            break;
         }
 
-        if (!m_touchRectList.contains(touchRect)) {
-            m_touchRectList << touchRect;
+        if (!m_monitorRectList.contains(evokeAreaRect)) {
+            m_monitorRectList << evokeAreaRect;
+            qDebug() << "dock evoke area:" << QRect(evokeAreaRect.x1, evokeAreaRect.y1, evokeAreaRect.x2, evokeAreaRect.y2);
+        }
+        if (!m_extralRectList.contains(extralAreaRect)) {
+            m_extralRectList << extralAreaRect;
+            qDebug() << "dock extral area:" << QRect(extralAreaRect.x1, extralAreaRect.y1, extralAreaRect.x2, extralAreaRect.y2);
+        }
+        if (!m_touchRectList.contains(touchEvokeAreaRect)) {
+            m_touchRectList << touchEvokeAreaRect;
+            qDebug() << "dock touch evoke area:" << QRect(touchEvokeAreaRect.x1, touchEvokeAreaRect.y1, touchEvokeAreaRect.x2, touchEvokeAreaRect.y2);
         }
     }
 
