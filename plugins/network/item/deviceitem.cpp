@@ -35,6 +35,7 @@ DeviceItem::DeviceItem(dde::network::NetworkDevice *device, QWidget *parent)
       m_device(device),
       m_path(device->path())
 {
+    setAccessibleName("DeviceItem");
 }
 
 QSize DeviceItem::sizeHint() const

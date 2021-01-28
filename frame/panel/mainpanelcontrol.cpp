@@ -98,6 +98,7 @@ MainPanelControl::~MainPanelControl()
 void MainPanelControl::initUi()
 {
     /* 固定区域 */
+    m_fixedAreaWidget->setAccessibleName("FixedArea");
     m_fixedAreaWidget->setObjectName("fixedarea");
     m_fixedAreaLayout->setSpacing(0);
     m_fixedAreaLayout->setContentsMargins(0, 0, 0, 0);
@@ -110,6 +111,7 @@ void MainPanelControl::initUi()
     /* 应用程序区域 */
     m_appAreaWidget->setAccessibleName("AppFullArea");
     m_mainPanelLayout->addWidget(m_appAreaWidget);
+    m_appAreaSonWidget->setAccessibleName("AppSonArea");
     m_appAreaSonWidget->setObjectName("apparea");
     m_appAreaSonLayout->setSpacing(0);
     m_appAreaSonLayout->setContentsMargins(0, 0, 0, 0);
@@ -119,6 +121,7 @@ void MainPanelControl::initUi()
     m_mainPanelLayout->addWidget(m_appSpliter);
 
     /* 托盘区域 */
+    m_trayAreaWidget->setAccessibleName("TrayArea");
     m_trayAreaWidget->setObjectName("trayarea");
     m_trayAreaLayout->setSpacing(0);
     m_trayAreaLayout->setContentsMargins(0, 10, 0, 10);
@@ -129,14 +132,16 @@ void MainPanelControl::initUi()
     m_mainPanelLayout->addWidget(m_traySpliter);
 
     /* 插件区域 */
+    m_pluginAreaWidget->setAccessibleName("PluginArea");
     m_pluginAreaWidget->setObjectName("pluginarea");
     m_pluginAreaLayout->setSpacing(10);
     m_pluginAreaLayout->setContentsMargins(0, 0, 0, 0);
     m_mainPanelLayout->addWidget(m_pluginAreaWidget);
 
     /* 桌面预览 */
-    m_mainPanelLayout->addWidget(m_desktopWidget);
+    m_desktopWidget->setAccessibleName("ShowDesktopArea");
     m_desktopWidget->setObjectName("showdesktoparea");
+    m_mainPanelLayout->addWidget(m_desktopWidget);
 
     m_mainPanelLayout->setSpacing(0);
     m_mainPanelLayout->setContentsMargins(0, 0, 0, 0);
