@@ -79,6 +79,7 @@ private slots:
     void onThemeTypeChanged(DGuiApplicationHelper::ColorType themeType);
 
 private:
+    void initUi();
     void getPluginState();
     void updateMasterControlSwitch();
     void updateView();
@@ -86,19 +87,17 @@ private:
 
 private:
     Dock::TipsWidget *m_tipsWidget; // 鼠标放在网络Item上的弹窗
-    QScrollArea *m_applet;          // 点击任务栏网络Item的弹窗
+    QScrollArea *m_appletScrollArea;          // 点击任务栏网络Item的弹窗
 
     QLabel *m_wiredTitle;
     DSwitchButton *m_switchWiredBtn;
-    QVBoxLayout *m_wiredLayout;
-    QWidget *m_wiredControlPanel;
+    QVBoxLayout *m_wiredListLayout;
+    QWidget *m_wiredControlWidget;
     bool m_switchWiredBtnState;
 
-    QLabel *m_wirelessTitle;
     DLoadingIndicator *m_loadingIndicator;
     DSwitchButton *m_switchWirelessBtn;
-    QVBoxLayout *m_wirelessLayout;
-    QWidget *m_wirelessControlPanel;
+    QWidget *m_wirelessWidget;
     bool m_switchWirelessBtnState;
 
     bool m_switchWire;

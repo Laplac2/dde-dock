@@ -11,7 +11,11 @@
 #include <QVBoxLayout>
 #include <QJsonDocument>
 
-extern const int ItemWidth;
+const int DeviceItemHeight = 36;
+const int ItemWidth = 300;
+const int TitleHeight = 46;
+const int TitleSpace = 2;
+const int MaxDeviceCount = 8;
 extern const int ItemMargin;
 extern const int ItemHeight;
 const int ControlItemHeight = 35;
@@ -41,7 +45,7 @@ extern void initFontColor(QWidget *widget)
 NetworkItem::NetworkItem(QWidget *parent)
     : QWidget(parent)
     , m_tipsWidget(new Dock::TipsWidget(this))
-    , m_applet(new QScrollArea(this))
+    , m_appletScrollArea(new QScrollArea(this))
     , m_switchWire(true)
     , m_timeOut(true)
     , m_timer(new QTimer(this))
@@ -51,91 +55,12 @@ NetworkItem::NetworkItem(QWidget *parent)
 
     m_tipsWidget->setVisible(false);
 
-    auto defaultFont = font();
-    auto titlefont = QFont(defaultFont.family(), defaultFont.pointSize() + 2);
-
-    m_wirelessControlPanel = new QWidget(this);
-    m_wirelessTitle = new QLabel(m_wirelessControlPanel);
-    m_wirelessTitle->setText(tr("Wireless Network"));
-    m_wirelessTitle->setFont(titlefont);
-    initFontColor(m_wirelessTitle);
-    m_switchWirelessBtn = new DSwitchButton(m_wirelessControlPanel);
     m_switchWirelessBtnState = false;
-
-    const QPixmap pixmap = DHiDPIHelper::loadNxPixmap(":/wireless/resources/wireless/refresh.svg");
-
-    m_loadingIndicator = new DLoadingIndicator;
-    m_loadingIndicator->setLoading(false);
-    m_loadingIndicator->setSmooth(true);
-    m_loadingIndicator->setAniDuration(1000);
-    m_loadingIndicator->setAniEasingCurve(QEasingCurve::InOutCirc);
-    m_loadingIndicator->installEventFilter(this);
-    m_loadingIndicator->setFixedSize(pixmap.size() / devicePixelRatioF());
-    m_loadingIndicator->viewport()->setAutoFillBackground(false);
-    m_loadingIndicator->setFrameShape(QFrame::NoFrame);
-    m_loadingIndicator->installEventFilter(this);
-
-    /* 无线网络部分 */
-    m_wirelessLayout = new QVBoxLayout;
-    m_wirelessLayout->setMargin(0);
-    m_wirelessLayout->setSpacing(0);
-    auto switchWirelessLayout = new QHBoxLayout;
-    switchWirelessLayout->setMargin(0);
-    switchWirelessLayout->setSpacing(0);
-    switchWirelessLayout->addSpacing(2);
-    switchWirelessLayout->addWidget(m_wirelessTitle);
-    switchWirelessLayout->addStretch();
-    switchWirelessLayout->addWidget(m_loadingIndicator);
-    switchWirelessLayout->addSpacing(10);
-    switchWirelessLayout->addWidget(m_switchWirelessBtn);
-    switchWirelessLayout->addSpacing(2);
-    m_wirelessControlPanel->setLayout(switchWirelessLayout);
-    m_wirelessControlPanel->setFixedHeight(ControlItemHeight);
-
-    /* 有线网络部分 */
-    m_wiredControlPanel = new QWidget(this);
-
-    m_wiredTitle = new QLabel(m_wiredControlPanel);
-    m_wiredTitle->setText(tr("Wired Network"));
-    m_wiredTitle->setFont(titlefont);
-    initFontColor(m_wiredTitle);
-    m_switchWiredBtn = new DSwitchButton(m_wiredControlPanel);
     m_switchWiredBtnState = false;
-    m_wiredLayout = new QVBoxLayout;
-    m_wiredLayout->setMargin(0);
-    m_wiredLayout->setSpacing(0);
-    auto switchWiredLayout = new QHBoxLayout;
-    switchWiredLayout->setMargin(0);
-    switchWiredLayout->setSpacing(0);
-    switchWiredLayout->addSpacing(2);
-    switchWiredLayout->addWidget(m_wiredTitle);
-    switchWiredLayout->addStretch();
-    switchWiredLayout->addWidget(m_switchWiredBtn);
-    switchWiredLayout->addSpacing(2);
-    m_wiredControlPanel->setLayout(switchWiredLayout);
-    m_wiredControlPanel->setFixedHeight(ControlItemHeight);
 
-    auto centralWidget = new QWidget(m_applet);
-    auto centralLayout = new QVBoxLayout;
-    centralLayout->setContentsMargins(QMargins(ItemMargin, 0, ItemMargin, 0));
-    centralLayout->setSpacing(0);
-    centralLayout->addWidget(m_wirelessControlPanel);
-    centralLayout->addLayout(m_wirelessLayout);
-    centralLayout->addWidget(m_wiredControlPanel);
-    centralLayout->addLayout(m_wiredLayout);
-    centralWidget->setLayout(centralLayout);
-    centralWidget->setFixedWidth(ItemWidth);
-    centralWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-    centralWidget->setStyleSheet("background-color: yellow"); // zzz-color
+    initUi();
 
-    m_applet->setFixedWidth(ItemWidth);
-    m_applet->setWidget(centralWidget);
-    m_applet->setFrameShape(QFrame::NoFrame);
-    m_applet->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_applet->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    centralWidget->setAutoFillBackground(false);
-    m_applet->viewport()->setAutoFillBackground(false);
-    m_applet->setVisible(false);
+    m_loadingIndicator->installEventFilter(this);
 
     connect(m_switchWireTimer, &QTimer::timeout, [ = ] {
         m_switchWire = !m_switchWire;
@@ -147,10 +72,89 @@ NetworkItem::NetworkItem(QWidget *parent)
     connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, &NetworkItem::onThemeTypeChanged);
 }
 
+void NetworkItem::initUi()
+{
+    QFont titleFont = QFont(font().family(), font().pointSize() + 2);
+    QPixmap pixmap = DHiDPIHelper::loadNxPixmap(":/wireless/resources/wireless/refresh.svg");
+
+    QWidget *contentWidget = new QWidget(this); // contents
+    contentWidget->resize(250, 100);
+    QVBoxLayout *contentLayout = new QVBoxLayout(contentWidget);
+    contentLayout->setContentsMargins(0, 0, 0, 0);
+    contentLayout->setSpacing(0);
+
+    /* wireless */
+    m_wirelessWidget = new QWidget(this); // wireless widget
+    m_wirelessWidget->setMinimumHeight(35);
+    QVBoxLayout *wirelessLayout = new QVBoxLayout(m_wirelessWidget); // wireless layout
+    wirelessLayout->setContentsMargins(0, 0, 0, 0);
+    wirelessLayout->setSpacing(1);
+    QWidget *wirelessSwitchWidget = new QWidget(m_wirelessWidget);
+    QHBoxLayout *wirelessSwitchLayout = new QHBoxLayout(wirelessSwitchWidget); // wireless title and switch button loyout
+    wirelessSwitchLayout->setContentsMargins(0, 0, 0, 0);
+    wirelessSwitchLayout->setSpacing(2);
+
+    QLabel *wirelessTitle = new QLabel(m_wirelessWidget); // wireless title
+    wirelessTitle->setText(tr("Wireless Network"));
+    wirelessTitle->setFont(titleFont);
+    initFontColor(wirelessTitle);
+    wirelessSwitchLayout->addWidget(wirelessTitle, 0, Qt::AlignLeft | Qt::AlignVCenter);
+
+    m_loadingIndicator = new DLoadingIndicator(m_wirelessWidget); // wireless loading indicator
+    m_loadingIndicator->setLoading(false);
+    m_loadingIndicator->setSmooth(true);
+    m_loadingIndicator->setAniDuration(1000);
+    m_loadingIndicator->setAniEasingCurve(QEasingCurve::InOutCirc);
+    m_loadingIndicator->setFixedSize(pixmap.size() / devicePixelRatioF());
+    m_loadingIndicator->viewport()->setAutoFillBackground(false);
+    m_loadingIndicator->setFrameShape(QFrame::NoFrame);
+    wirelessSwitchLayout->addWidget(m_loadingIndicator, 1, Qt::AlignRight | Qt::AlignVCenter);
+
+    m_switchWirelessBtn = new DSwitchButton(m_wirelessWidget); // wireless switch button
+    wirelessSwitchLayout->addWidget(m_switchWirelessBtn, 0, Qt::AlignRight | Qt::AlignVCenter);
+
+    wirelessLayout->addWidget(wirelessSwitchWidget, 0, Qt::AlignVCenter);
+    contentLayout->addWidget(m_wirelessWidget);
+
+    /* wired */
+    m_wiredControlWidget = new QWidget(this);
+    m_wiredControlWidget->setMinimumHeight(35);
+    contentLayout->addWidget(m_wiredControlWidget);
+    QHBoxLayout *wiredControlLayout = new QHBoxLayout(m_wiredControlWidget);
+    wiredControlLayout->setContentsMargins(0, 0, 0, 0);
+    wiredControlLayout->setSpacing(0);
+
+    m_wiredTitle = new QLabel(m_wiredControlWidget); // wired title
+    m_wiredTitle->setText(tr("Wired Network"));
+    m_wiredTitle->setFont(titleFont);
+    initFontColor(m_wiredTitle);
+    wiredControlLayout->addWidget(m_wiredTitle, 0, Qt::AlignLeft);
+
+    m_switchWiredBtn = new DSwitchButton(m_wiredControlWidget); // wired switch button
+    wiredControlLayout->addWidget(m_switchWiredBtn, 0, Qt::AlignRight);
+
+    m_wiredListLayout = new QVBoxLayout;
+    m_wiredListLayout->setContentsMargins(0, 0, 0, 0);
+    m_wiredListLayout->setSpacing(0);
+    contentLayout->addLayout(m_wiredListLayout);
+
+    m_appletScrollArea->setWidget(contentWidget);
+    contentWidget->setAutoFillBackground(false);
+    m_appletScrollArea->viewport()->setAutoFillBackground(false);
+    m_appletScrollArea->resize(250, 130);
+    m_appletScrollArea->setMaximumSize(250, 335);
+    m_appletScrollArea->setWidgetResizable(true);
+    m_appletScrollArea->setFrameShape(QFrame::NoFrame);
+    m_appletScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_appletScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    m_appletScrollArea->setVisible(false);
+
+}
+
 QWidget *NetworkItem::itemApplet()
 {
-    m_applet->setVisible(true);
-    return m_applet;
+    m_appletScrollArea->setVisible(true);
+    return m_appletScrollArea;
 }
 
 QWidget *NetworkItem::itemTips()
@@ -195,7 +199,7 @@ void NetworkItem::updateDeviceItems(QMap<QString, WiredItem *> &wiredItems, QMap
                 wiredItem->setParent(this);
                 m_wiredItems.insert(path, wiredItem);
                 wiredItem->setVisible(true);
-                m_wiredLayout->addWidget(wiredItem);
+                m_wiredListLayout->addWidget(wiredItem);
             }
         }
     }
@@ -206,7 +210,7 @@ void NetworkItem::updateDeviceItems(QMap<QString, WiredItem *> &wiredItems, QMap
             m_wirelessItems.remove(path);
             m_connectedWirelessDevice.remove(path); // 从已连接成功的列表中去除没用了的设备
             wirelessItem->itemApplet()->setVisible(false);
-            m_wirelessLayout->removeWidget(wirelessItem->itemApplet());
+            m_wirelessWidget->layout()->removeWidget(wirelessItem->itemApplet());
             delete wirelessItem;
         }
     }
@@ -216,7 +220,7 @@ void NetworkItem::updateDeviceItems(QMap<QString, WiredItem *> &wiredItems, QMap
             m_wiredItems.remove(path);
             m_connectedWiredDevice.remove(path);
             wiredItem->setVisible(false);
-            m_wiredLayout->removeWidget(wiredItem);
+            m_wiredListLayout->removeWidget(wiredItem);
             delete wiredItem;
         }
     }
@@ -505,8 +509,8 @@ void NetworkItem::wirelessEnable(bool enable)
     for (auto wirelessItem : m_wirelessItems) {
         if (wirelessItem) {
             wirelessItem->setDeviceEnabled(enable);
-            enable ? m_wirelessLayout->addWidget(wirelessItem->itemApplet())
-            : m_wirelessLayout->removeWidget(wirelessItem->itemApplet());
+            enable ? m_wirelessWidget->layout()->addWidget(wirelessItem->itemApplet())
+            : m_wirelessWidget->layout()->removeWidget(wirelessItem->itemApplet());
             wirelessItem->itemApplet()->setVisible(enable);
         }
     }
@@ -1056,8 +1060,10 @@ void NetworkItem::getPluginState()
 
 void NetworkItem::updateView()
 {
+    m_appletScrollArea->resize(250, 335);
+    return;
     // 固定显示高度即为固定示项目数
-    const int constDisplayItemCnt = 10;
+    const int constDisplayItemCnt = 5;
     int contentHeight = 0;
     int itemCount = 0;
 
@@ -1081,13 +1087,13 @@ void NetworkItem::updateView()
     // 设备总控开关只与是否有设备相关
     auto wirelessDeviceCnt = m_wirelessItems.size();
     if (wirelessDeviceCnt)
-        contentHeight += m_wirelessControlPanel->height();
-    m_wirelessControlPanel->setVisible(wirelessDeviceCnt);
+        contentHeight += m_wirelessWidget->height();
+    m_wirelessWidget->setVisible(wirelessDeviceCnt);
 
     auto wiredDeviceCnt = m_wiredItems.size();
     if (wiredDeviceCnt)
-        contentHeight += m_wiredControlPanel->height();
-    m_wiredControlPanel->setVisible(wiredDeviceCnt);
+        contentHeight += m_wiredControlWidget->height();
+    m_wiredControlWidget->setVisible(wiredDeviceCnt);
 
     itemCount += wiredDeviceCnt;
 
@@ -1095,18 +1101,20 @@ void NetworkItem::updateView()
 //    auto hasDevice = wirelessDeviceCnt && wiredDeviceCnt;
 //    m_line->setVisible(hasDevice);
 
-    auto centralWidget = m_applet->widget();
+    auto centralWidget = m_appletScrollArea->widget();
     if (itemCount <= constDisplayItemCnt) {
         contentHeight += (itemCount - wiredDeviceCnt) * ItemHeight;
         contentHeight += wiredDeviceCnt * ItemHeight;
-        centralWidget->setFixedHeight(contentHeight);
-        m_applet->setFixedHeight(contentHeight);
+//        centralWidget->setFixedHeight(contentHeight);
+//        m_appletScrollArea->setFixedHeight(contentHeight);
+        centralWidget->resize(250, contentHeight);
+        m_appletScrollArea->resize(250, contentHeight);
     } else {
         contentHeight += (itemCount - wiredDeviceCnt) * ItemHeight;
         contentHeight += wiredDeviceCnt * ItemHeight;
-        centralWidget->setFixedHeight(contentHeight);
-        m_applet->setFixedHeight(constDisplayItemCnt * ItemHeight);
-        m_applet->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+//        centralWidget->setFixedHeight(contentHeight);
+//        m_appletScrollArea->setFixedHeight(constDisplayItemCnt * ItemHeight);
+//        m_appletScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     }
 }
 
@@ -1158,9 +1166,9 @@ void NetworkItem::updateMasterControlSwitch()
             continue;
         }
         if (m_switchWiredBtnState) {
-            m_wiredLayout->addWidget(wiredItem->itemApplet());
+            m_wiredListLayout->addWidget(wiredItem->itemApplet());
         } else {
-            m_wiredLayout->removeWidget(wiredItem->itemApplet());
+            m_wiredListLayout->removeWidget(wiredItem->itemApplet());
         }
         // wiredItem->itemApplet()->setVisible(m_switchWiredBtnState); // TODO
         wiredItem->setVisible(m_switchWiredBtnState);
@@ -1183,9 +1191,9 @@ void NetworkItem::updateMasterControlSwitch()
             continue;
         }
         if (m_switchWirelessBtnState) {
-            m_wirelessLayout->addWidget(wirelessItem->itemApplet());
+            m_wirelessWidget->layout()->addWidget(wirelessItem->itemApplet());
         } else {
-            m_wirelessLayout->removeWidget(wirelessItem->itemApplet());
+            m_wirelessWidget->layout()->removeWidget(wirelessItem->itemApplet());
         }
         wirelessItem->itemApplet()->setVisible(m_switchWirelessBtnState);
         wirelessItem->setVisible(m_switchWirelessBtnState);
