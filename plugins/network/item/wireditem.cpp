@@ -44,7 +44,6 @@ extern void initFontColor(QWidget *widget);
 
 WiredItem::WiredItem(WiredDevice *device, const QString &deviceName, QWidget *parent)
     : DeviceItem(device, parent)
-    , m_itemWidget(new QWidget)
     , m_deviceName(deviceName)
     , m_itemLabel(new QLabel(this))
     , m_itemIcon(new QLabel(this))
@@ -53,7 +52,9 @@ WiredItem::WiredItem(WiredDevice *device, const QString &deviceName, QWidget *pa
     , m_freshWiredIcon(new QTimer(this))
 {
     /* init ui */
-    QHBoxLayout *itemLayout = new QHBoxLayout(m_itemWidget);
+//    setMinimumHeight(30);
+    setFixedSize(250, 30);
+    QHBoxLayout *itemLayout = new QHBoxLayout(this);
     itemLayout->setContentsMargins(0, 0, 0, 0);
     itemLayout->setSpacing(0);
 
@@ -92,11 +93,6 @@ WiredItem::WiredItem(WiredDevice *device, const QString &deviceName, QWidget *pa
 
     deviceStateChanged(m_device->status());
     setWiredStateIcon();
-}
-
-QWidget *WiredItem::itemApplet()
-{
-    return m_itemWidget;
 }
 
 void WiredItem::setTitle(const QString &name)

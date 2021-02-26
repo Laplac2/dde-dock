@@ -61,7 +61,6 @@ public:
 public:
     explicit WiredItem(dde::network::WiredDevice *device, const QString &deviceName, QWidget *parent = nullptr);
 
-    QWidget *itemApplet() override;
     void setTitle(const QString &name);
     bool deviceEabled();
     void setDeviceEnabled(bool enabled);
@@ -83,7 +82,6 @@ private slots:
     void changedActiveWiredConnectionInfo(const QJsonObject &connInfo);
 
 private:
-    QWidget *m_itemWidget;
     QString m_deviceName;
     QLabel *m_itemLabel;
     QLabel *m_itemIcon;

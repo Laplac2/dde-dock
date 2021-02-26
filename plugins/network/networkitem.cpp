@@ -115,7 +115,7 @@ void NetworkItem::initUi()
     wirelessSwitchLayout->addWidget(m_switchWirelessBtn, 0, Qt::AlignRight | Qt::AlignVCenter);
 
     wirelessLayout->addWidget(wirelessSwitchWidget, 0, Qt::AlignVCenter);
-    m_wirelessWidget->hide();
+//    m_wirelessWidget->hide();
     appletContentLayout->addWidget(m_wirelessWidget);
 
     /* wired */
@@ -216,7 +216,7 @@ void NetworkItem::updateDeviceItems(QMap<QString, WiredItem *> &wiredItems, QMap
                 wiredItem->setParent(this);
                 m_wiredItems.insert(path, wiredItem);
                 wiredItem->setVisible(true);
-                m_wiredWidget->layout()->addWidget(wiredItem->itemApplet());
+                m_wiredWidget->layout()->addWidget(wiredItem);
             }
         }
     }
@@ -227,7 +227,7 @@ void NetworkItem::updateDeviceItems(QMap<QString, WiredItem *> &wiredItems, QMap
             m_wiredItems.remove(path);
             m_connectedWiredDevice.remove(path);
             wiredItem->setVisible(false);
-            m_wiredWidget->layout()->removeWidget(wiredItem->itemApplet());
+            m_wiredWidget->layout()->removeWidget(wiredItem);
             delete wiredItem;
         }
     }
@@ -1067,8 +1067,8 @@ void NetworkItem::getPluginState()
 
 void NetworkItem::updateView()
 {
-    m_appletScrollArea->widget()->resize(250, 50);
-    m_appletScrollArea->resize(250, 30);
+    m_appletScrollArea->widget()->resize(250, 370);
+    m_appletScrollArea->resize(250, 370);
     return;
 
     // 固定显示高度即为固定示项目数
@@ -1175,12 +1175,11 @@ void NetworkItem::updateSwitchState()
             continue;
         }
         if (m_switchWiredBtnState) {
-             m_wiredWidget->layout()->addWidget(wiredItem->itemApplet());
+             m_wiredWidget->layout()->addWidget(wiredItem);
         } else {
-             m_wiredWidget->layout()->removeWidget(wiredItem->itemApplet());
+             m_wiredWidget->layout()->removeWidget(wiredItem);
         }
-        wiredItem->itemApplet()->setVisible(m_switchWiredBtnState); // TODO
-        wiredItem->setVisible(m_switchWiredBtnState);
+        wiredItem->setVisible(m_switchWiredBtnState); // TODO
     }
 
     /* 获取无线适配器启用状态 */
