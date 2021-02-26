@@ -60,28 +60,28 @@ NetworkItem::NetworkItem(QWidget *parent)
 
     initUi();
 
-    m_loadingIndicator->installEventFilter(this);
+    m_wirelessLoadingIndicator->installEventFilter(this);
 
     connect(m_switchWireTimer, &QTimer::timeout, [ = ] {
         m_switchWire = !m_switchWire;
         m_timeOut = true;
     });
     connect(m_timer, &QTimer::timeout, this, &NetworkItem::refreshIcon);
-    connect(m_switchWiredBtn, &DSwitchButton::toggled, this, &NetworkItem::wiredsEnable);
+    connect(m_wiredSwitchButton, &DSwitchButton::toggled, this, &NetworkItem::wiredsEnable);
     connect(m_switchWirelessBtn, &DSwitchButton::toggled, this, &NetworkItem::wirelessEnable);
     connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, &NetworkItem::onThemeTypeChanged);
 }
 
 void NetworkItem::initUi()
 {
-    QFont titleFont = QFont(font().family(), font().pointSize() + 2);
+    QFont labelFont = QFont(font().family(), font().pointSize() + 2);
     QPixmap pixmap = DHiDPIHelper::loadNxPixmap(":/wireless/resources/wireless/refresh.svg");
 
-    QWidget *contentWidget = new QWidget(this); // contents
-    contentWidget->resize(250, 100);
-    QVBoxLayout *contentLayout = new QVBoxLayout(contentWidget);
-    contentLayout->setContentsMargins(0, 0, 0, 0);
-    contentLayout->setSpacing(0);
+    QWidget *appletContentWidget = new QWidget(this); // contents
+    appletContentWidget->setMinimumSize(250, 35);
+    QVBoxLayout *appletContentLayout = new QVBoxLayout(appletContentWidget);
+    appletContentLayout->setContentsMargins(0, 0, 0, 0);
+    appletContentLayout->setSpacing(0);
 
     /* wireless */
     m_wirelessWidget = new QWidget(this); // wireless widget
@@ -89,60 +89,66 @@ void NetworkItem::initUi()
     QVBoxLayout *wirelessLayout = new QVBoxLayout(m_wirelessWidget); // wireless layout
     wirelessLayout->setContentsMargins(0, 0, 0, 0);
     wirelessLayout->setSpacing(1);
-    QWidget *wirelessSwitchWidget = new QWidget(m_wirelessWidget);
+    QWidget *wirelessSwitchWidget = new QWidget(m_wirelessWidget); // wireless switch widget
+    wirelessSwitchWidget->setMinimumHeight(35);
     QHBoxLayout *wirelessSwitchLayout = new QHBoxLayout(wirelessSwitchWidget); // wireless title and switch button loyout
     wirelessSwitchLayout->setContentsMargins(0, 0, 0, 0);
     wirelessSwitchLayout->setSpacing(2);
 
-    QLabel *wirelessTitle = new QLabel(m_wirelessWidget); // wireless title
-    wirelessTitle->setText(tr("Wireless Network"));
-    wirelessTitle->setFont(titleFont);
-    initFontColor(wirelessTitle);
-    wirelessSwitchLayout->addWidget(wirelessTitle, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    QLabel *wirelessLabel = new QLabel(m_wirelessWidget); // wireless title
+    wirelessLabel->setText(tr("Wireless Network"));
+    wirelessLabel->setFont(labelFont);
+    initFontColor(wirelessLabel);
+    wirelessSwitchLayout->addWidget(wirelessLabel, 1, Qt::AlignLeft | Qt::AlignVCenter);
 
-    m_loadingIndicator = new DLoadingIndicator(m_wirelessWidget); // wireless loading indicator
-    m_loadingIndicator->setLoading(false);
-    m_loadingIndicator->setSmooth(true);
-    m_loadingIndicator->setAniDuration(1000);
-    m_loadingIndicator->setAniEasingCurve(QEasingCurve::InOutCirc);
-    m_loadingIndicator->setFixedSize(pixmap.size() / devicePixelRatioF());
-    m_loadingIndicator->viewport()->setAutoFillBackground(false);
-    m_loadingIndicator->setFrameShape(QFrame::NoFrame);
-    wirelessSwitchLayout->addWidget(m_loadingIndicator, 1, Qt::AlignRight | Qt::AlignVCenter);
+    m_wirelessLoadingIndicator = new DLoadingIndicator(m_wirelessWidget); // wireless loading indicator
+    m_wirelessLoadingIndicator->setLoading(false);
+    m_wirelessLoadingIndicator->setSmooth(true);
+    m_wirelessLoadingIndicator->setAniDuration(1000);
+    m_wirelessLoadingIndicator->setAniEasingCurve(QEasingCurve::InOutCirc);
+    m_wirelessLoadingIndicator->setFixedSize(pixmap.size() / devicePixelRatioF());
+    m_wirelessLoadingIndicator->viewport()->setAutoFillBackground(false);
+    m_wirelessLoadingIndicator->setFrameShape(QFrame::NoFrame);
+    wirelessSwitchLayout->addWidget(m_wirelessLoadingIndicator, 0, Qt::AlignRight | Qt::AlignVCenter);
 
     m_switchWirelessBtn = new DSwitchButton(m_wirelessWidget); // wireless switch button
     wirelessSwitchLayout->addWidget(m_switchWirelessBtn, 0, Qt::AlignRight | Qt::AlignVCenter);
 
     wirelessLayout->addWidget(wirelessSwitchWidget, 0, Qt::AlignVCenter);
-    contentLayout->addWidget(m_wirelessWidget);
+    m_wirelessWidget->hide();
+    appletContentLayout->addWidget(m_wirelessWidget);
 
     /* wired */
-    m_wiredControlWidget = new QWidget(this);
-    m_wiredControlWidget->setMinimumHeight(35);
-    contentLayout->addWidget(m_wiredControlWidget);
-    QHBoxLayout *wiredControlLayout = new QHBoxLayout(m_wiredControlWidget);
-    wiredControlLayout->setContentsMargins(0, 0, 0, 0);
-    wiredControlLayout->setSpacing(0);
+    m_wiredWidget = new QWidget(this); // wired widget
+    m_wiredWidget->resize(250, 100);
+    m_wiredWidget->setMinimumHeight(35);
+    QVBoxLayout *wiredLayout = new QVBoxLayout(m_wiredWidget);
+    wiredLayout->setContentsMargins(0, 0, 0, 0);
+    wiredLayout->setSpacing(10);
 
-    m_wiredTitle = new QLabel(m_wiredControlWidget); // wired title
-    m_wiredTitle->setText(tr("Wired Network"));
-    m_wiredTitle->setFont(titleFont);
-    initFontColor(m_wiredTitle);
-    wiredControlLayout->addWidget(m_wiredTitle, 0, Qt::AlignLeft);
+    QWidget *wiredSwitchWidget = new QWidget(m_wiredWidget); // wired tittle and switch button widget
+    wiredSwitchWidget->setMinimumHeight(35);
+    QHBoxLayout *wiredSwitchLayout = new QHBoxLayout(wiredSwitchWidget);
+    wiredSwitchLayout->setContentsMargins(0, 0, 0, 0);
+    wiredSwitchLayout->setSpacing(0);
 
-    m_switchWiredBtn = new DSwitchButton(m_wiredControlWidget); // wired switch button
-    wiredControlLayout->addWidget(m_switchWiredBtn, 0, Qt::AlignRight);
+    QLabel *wiredLabel = new QLabel(m_wiredWidget); // wired label
+    wiredLabel->setText(tr("Wired Network"));
+    wiredLabel->setFont(labelFont);
+    initFontColor(wiredLabel);
+    wiredSwitchLayout->addWidget(wiredLabel, 1, Qt::AlignLeft | Qt::AlignVCenter);
 
-    m_wiredListLayout = new QVBoxLayout;
-    m_wiredListLayout->setContentsMargins(0, 0, 0, 0);
-    m_wiredListLayout->setSpacing(0);
-    contentLayout->addLayout(m_wiredListLayout);
+    m_wiredSwitchButton = new DSwitchButton(m_wiredWidget); // wired switch button
+    wiredSwitchLayout->addWidget(m_wiredSwitchButton, 0, Qt::AlignRight | Qt::AlignVCenter);
 
-    m_appletScrollArea->setWidget(contentWidget);
-    contentWidget->setAutoFillBackground(false);
+    wiredLayout->addWidget(wiredSwitchWidget, 0, Qt::AlignVCenter); // add wired switch widget to wired widget
+    appletContentLayout->addWidget(m_wiredWidget); // add wired widget to scroll area content widget
+
+    m_appletScrollArea->setWidget(appletContentWidget);
+    appletContentWidget->setAutoFillBackground(false);
     m_appletScrollArea->viewport()->setAutoFillBackground(false);
     m_appletScrollArea->resize(250, 130);
-    m_appletScrollArea->setMaximumSize(250, 335);
+    m_appletScrollArea->setMaximumSize(250, 370);
     m_appletScrollArea->setWidgetResizable(true);
     m_appletScrollArea->setFrameShape(QFrame::NoFrame);
     m_appletScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -188,6 +194,17 @@ void NetworkItem::updateDeviceItems(QMap<QString, WiredItem *> &wiredItems, QMap
         }
     }
 
+    for (auto wirelessItem : tempWirelessItems) {
+        if (wirelessItem) {
+            auto path = wirelessItem->device()->path();
+            m_wirelessItems.remove(path);
+            m_connectedWirelessDevice.remove(path); // 从已连接成功的列表中去除没用了的设备
+            wirelessItem->itemApplet()->setVisible(false);
+            m_wirelessWidget->layout()->removeWidget(wirelessItem->itemApplet());
+            delete wirelessItem;
+        }
+    }
+
     for (auto wiredItem : wiredItems) {
         if (wiredItem) {
             auto path = wiredItem->path();
@@ -199,28 +216,18 @@ void NetworkItem::updateDeviceItems(QMap<QString, WiredItem *> &wiredItems, QMap
                 wiredItem->setParent(this);
                 m_wiredItems.insert(path, wiredItem);
                 wiredItem->setVisible(true);
-                m_wiredListLayout->addWidget(wiredItem);
+                m_wiredWidget->layout()->addWidget(wiredItem->itemApplet());
             }
         }
     }
 
-    for (auto wirelessItem : tempWirelessItems) {
-        if (wirelessItem) {
-            auto path = wirelessItem->device()->path();
-            m_wirelessItems.remove(path);
-            m_connectedWirelessDevice.remove(path); // 从已连接成功的列表中去除没用了的设备
-            wirelessItem->itemApplet()->setVisible(false);
-            m_wirelessWidget->layout()->removeWidget(wirelessItem->itemApplet());
-            delete wirelessItem;
-        }
-    }
     for (auto wiredItem : tempWiredItems) {
         if (wiredItem) {
             auto path = wiredItem->device()->path();
             m_wiredItems.remove(path);
             m_connectedWiredDevice.remove(path);
             wiredItem->setVisible(false);
-            m_wiredListLayout->removeWidget(wiredItem);
+            m_wiredWidget->layout()->removeWidget(wiredItem->itemApplet());
             delete wiredItem;
         }
     }
@@ -315,7 +322,7 @@ void NetworkItem::refreshIcon()
         pixmap = DHiDPIHelper::loadNxPixmap(":/wireless/resources/wireless/refresh_dark.svg");
     else
         pixmap = DHiDPIHelper::loadNxPixmap(":/wireless/resources/wireless/refresh.svg");
-    m_loadingIndicator->setImageSource(pixmap); // 加载指示器
+    m_wirelessLoadingIndicator->setImageSource(pixmap); // 加载指示器
 
     QString stateString;
     QString iconString;
@@ -465,7 +472,7 @@ void NetworkItem::paintEvent(QPaintEvent *e)
 
 bool NetworkItem::eventFilter(QObject *obj, QEvent *event)
 {
-    if (obj == m_loadingIndicator) {
+    if (obj == m_wirelessLoadingIndicator) {
         if (event->type() == QEvent::MouseButtonPress) {
             for (auto wirelessItem : m_wirelessItems) {
                 if (wirelessItem) {
@@ -1060,8 +1067,10 @@ void NetworkItem::getPluginState()
 
 void NetworkItem::updateView()
 {
-    m_appletScrollArea->resize(250, 335);
+    m_appletScrollArea->widget()->resize(250, 50);
+    m_appletScrollArea->resize(250, 30);
     return;
+
     // 固定显示高度即为固定示项目数
     const int constDisplayItemCnt = 5;
     int contentHeight = 0;
@@ -1092,8 +1101,8 @@ void NetworkItem::updateView()
 
     auto wiredDeviceCnt = m_wiredItems.size();
     if (wiredDeviceCnt)
-        contentHeight += m_wiredControlWidget->height();
-    m_wiredControlWidget->setVisible(wiredDeviceCnt);
+        contentHeight += m_wiredWidget->height();
+    m_wiredWidget->setVisible(wiredDeviceCnt);
 
     itemCount += wiredDeviceCnt;
 
@@ -1121,7 +1130,7 @@ void NetworkItem::updateView()
 void NetworkItem::updateSelf()
 {
     getPluginState();
-    updateMasterControlSwitch();
+    updateSwitchState();
     refreshIcon();
     refreshTips();
     updateView();
@@ -1144,7 +1153,7 @@ int NetworkItem::getStrongestAp()
 /**
  * @brief 更新有线（无线）适配器的开关状态，并根据开关状态显示设备列表。
  */
-void NetworkItem::updateMasterControlSwitch()
+void NetworkItem::updateSwitchState()
 {
     m_switchWiredBtnState = false;
     m_switchWirelessBtnState = false;
@@ -1157,20 +1166,20 @@ void NetworkItem::updateMasterControlSwitch()
         }
     }
     /* 更新有线适配器总开关状态（阻塞信号是为了防止重复设置适配器启用状态）*/
-    m_switchWiredBtn->blockSignals(true);
-    m_switchWiredBtn->setChecked(m_switchWiredBtnState);
-    m_switchWiredBtn->blockSignals(false);
+    m_wiredSwitchButton->blockSignals(true);
+    m_wiredSwitchButton->setChecked(m_switchWiredBtnState);
+    m_wiredSwitchButton->blockSignals(false);
     /* 根据有线适配器启用状态增/删布局中的组件 */
     for (WiredItem *wiredItem : m_wiredItems) {
         if (!wiredItem) {
             continue;
         }
         if (m_switchWiredBtnState) {
-            m_wiredListLayout->addWidget(wiredItem->itemApplet());
+             m_wiredWidget->layout()->addWidget(wiredItem->itemApplet());
         } else {
-            m_wiredListLayout->removeWidget(wiredItem->itemApplet());
+             m_wiredWidget->layout()->removeWidget(wiredItem->itemApplet());
         }
-        // wiredItem->itemApplet()->setVisible(m_switchWiredBtnState); // TODO
+        wiredItem->itemApplet()->setVisible(m_switchWiredBtnState); // TODO
         wiredItem->setVisible(m_switchWiredBtnState);
     }
 
@@ -1199,12 +1208,11 @@ void NetworkItem::updateMasterControlSwitch()
         wirelessItem->setVisible(m_switchWirelessBtnState);
     }
 
-    m_loadingIndicator->setVisible(m_switchWirelessBtnState || m_switchWiredBtnState);
+    m_wirelessLoadingIndicator->setVisible(m_switchWirelessBtnState || m_switchWiredBtnState);
 }
 
 void NetworkItem::refreshTips()
 {
-    // qDebug() << ">" << Q_FUNC_INFO << "m_pluginState:" << m_pluginState;
     switch (m_pluginState) {
     case Disabled:
     case Adisabled:
@@ -1281,12 +1289,9 @@ void NetworkItem::refreshTips()
         QString strTips;
         QStringList textList;
         int wireIndex = 1;
-        // qDebug()<<"m_connectedWiredDevice:"<<m_connectedWiredDevice;
         for (auto wiredItem : m_connectedWiredDevice) {
-            // qDebug()<<"wiredItem:"<<wiredItem;
             if (wiredItem) {
                 auto info = wiredItem->getActiveWiredConnectionInfo();
-                // qDebug() << "ActiveWiredConnectionInfo:" << wiredItem << info;
                 if (!info.contains("Ip4")) {
                     textList << "BConnected, but don't contains IPv4.\n";
                     continue;
@@ -1334,7 +1339,6 @@ void NetworkItem::refreshTips()
         m_tipsWidget->setText(tr("Network cable unplugged"));
         break;
     }
-    // qDebug() << "<" << Q_FUNC_INFO << "m_tipsWidget->textList:" << m_tipsWidget->textList();
 }
 
 bool NetworkItem::isShowControlCenter()
@@ -1378,10 +1382,10 @@ bool NetworkItem::isShowControlCenter()
 
 void NetworkItem::wirelessScan()
 {
-    if (m_loadingIndicator->loading())
+    if (m_wirelessLoadingIndicator->loading())
         return;
-    m_loadingIndicator->setLoading(true);
+    m_wirelessLoadingIndicator->setLoading(true);
     QTimer::singleShot(1000, this, [ = ] {
-        m_loadingIndicator->setLoading(false);
+        m_wirelessLoadingIndicator->setLoading(false);
     });
 }

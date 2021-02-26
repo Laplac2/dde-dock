@@ -81,7 +81,7 @@ private slots:
 private:
     void initUi();
     void getPluginState();
-    void updateMasterControlSwitch();
+    void updateSwitchState();
     void updateView();
     int getStrongestAp();
 
@@ -89,13 +89,11 @@ private:
     Dock::TipsWidget *m_tipsWidget; // 鼠标放在网络Item上的弹窗
     QScrollArea *m_appletScrollArea;          // 点击任务栏网络Item的弹窗
 
-    QLabel *m_wiredTitle;
-    DSwitchButton *m_switchWiredBtn;
-    QVBoxLayout *m_wiredListLayout;
-    QWidget *m_wiredControlWidget;
+    DSwitchButton *m_wiredSwitchButton;
+    QWidget *m_wiredWidget;
     bool m_switchWiredBtnState;
 
-    DLoadingIndicator *m_loadingIndicator;
+    DLoadingIndicator *m_wirelessLoadingIndicator;
     DSwitchButton *m_switchWirelessBtn;
     QWidget *m_wirelessWidget;
     bool m_switchWirelessBtnState;

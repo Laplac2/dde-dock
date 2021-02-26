@@ -44,42 +44,34 @@ extern void initFontColor(QWidget *widget);
 
 WiredItem::WiredItem(WiredDevice *device, const QString &deviceName, QWidget *parent)
     : DeviceItem(device, parent)
+    , m_itemWidget(new QWidget)
     , m_deviceName(deviceName)
-    , m_connectedName(new QLabel(this))
-    , m_wiredIcon(new QLabel(this))
+    , m_itemLabel(new QLabel(this))
+    , m_itemIcon(new QLabel(this))
     , m_stateButton(new StateButton(this))
     , m_loadingStat(new DSpinner(this))
     , m_freshWiredIcon(new QTimer(this))
 {
-    setFixedHeight(ItemHeight);
+    /* init ui */
+    QHBoxLayout *itemLayout = new QHBoxLayout(m_itemWidget);
+    itemLayout->setContentsMargins(0, 0, 0, 0);
+    itemLayout->setSpacing(0);
+
+    itemLayout->addWidget(m_itemIcon, 0, Qt::AlignLeft | Qt::AlignVCenter);
+
+    m_itemLabel->setText(m_deviceName);
+    initFontColor(m_itemLabel);
+    itemLayout->addWidget(m_itemLabel , 1, Qt::AlignLeft | Qt::AlignVCenter);
 
     m_stateButton->setFixedSize(PLUGIN_ICON_MAX_SIZE, PLUGIN_ICON_MAX_SIZE);
     m_stateButton->setType(StateButton::Check);
-    m_stateButton->setVisible(false);
+    itemLayout->addWidget(m_stateButton, 0, Qt::AlignRight | Qt::AlignVCenter);
+
     m_loadingStat->setFixedSize(PLUGIN_ICON_MAX_SIZE, PLUGIN_ICON_MAX_SIZE);
-    m_loadingStat->setVisible(false);
+    itemLayout->addWidget(m_loadingStat, 0, Qt::AlignRight | Qt::AlignVCenter);
+    setFixedHeight(30);
 
-    m_connectedName->setText(m_deviceName);
-    m_connectedName->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    initFontColor(m_connectedName);
-
-    auto connectionLayout = new QVBoxLayout(this);
-    connectionLayout->setMargin(0);
-    connectionLayout->setSpacing(0);
-
-    auto itemLayout = new QHBoxLayout;
-    itemLayout->setMargin(0);
-    itemLayout->setSpacing(0);
-    itemLayout->addSpacing(16);
-    itemLayout->addWidget(m_wiredIcon);
-    itemLayout->addSpacing(8);
-    itemLayout->addWidget(m_connectedName);
-    itemLayout->addWidget(m_stateButton);
-    itemLayout->addWidget(m_loadingStat);
-    itemLayout->addSpacing(3);
-    connectionLayout->addLayout(itemLayout);
-    setLayout(connectionLayout);
-
+    /* init connection */
     connect(m_freshWiredIcon, &QTimer::timeout, this, &WiredItem::setWiredStateIcon);
     connect(m_device, static_cast<void (NetworkDevice::*)(const bool) const>(&NetworkDevice::enableChanged),
             this, &WiredItem::enableChanged);
@@ -102,10 +94,15 @@ WiredItem::WiredItem(WiredDevice *device, const QString &deviceName, QWidget *pa
     setWiredStateIcon();
 }
 
+QWidget *WiredItem::itemApplet()
+{
+    return m_itemWidget;
+}
+
 void WiredItem::setTitle(const QString &name)
 {
     if (m_device->status() != NetworkDevice::Activated)
-        m_connectedName->setText(name);
+        m_itemLabel->setText(name);
     m_deviceName = name;
 }
 
@@ -162,7 +159,7 @@ void WiredItem::setThemeType(DGuiApplicationHelper::ColorType themeType)
     auto pixpath = QString(":/wired/resources/wired/network-wired-symbolic");
     pixpath = isLight ? pixpath + "-dark.svg" : pixpath +  LightType;
     auto iconPix = Utils::renderSVG(pixpath, QSize(PLUGIN_ICON_MAX_SIZE, PLUGIN_ICON_MAX_SIZE), devicePixelRatioF());
-    m_wiredIcon->setPixmap(iconPix);
+    m_itemIcon->setPixmap(iconPix);
 }
 
 void WiredItem::setWiredStateIcon()
@@ -206,7 +203,7 @@ void WiredItem::setWiredStateIcon()
             if (DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType)
                 iconString.append(PLUGIN_MIN_ICON_NAME);
             pixmap = ImageUtil::loadSvg(iconString, ":/", PLUGIN_ICON_MAX_SIZE, ratio);
-            m_wiredIcon->setPixmap(pixmap);
+            m_itemIcon->setPixmap(pixmap);
             update();
             return;
         }
@@ -233,7 +230,7 @@ void WiredItem::setWiredStateIcon()
         iconString.append(PLUGIN_MIN_ICON_NAME);
 
     pixmap = ImageUtil::loadSvg(iconString, ":/", PLUGIN_ICON_MAX_SIZE, ratio);
-    m_wiredIcon->setPixmap(pixmap);
+    m_itemIcon->setPixmap(pixmap);
     update();
 }
 
@@ -244,7 +241,6 @@ void WiredItem::refreshConnectivity()
 
 void WiredItem::deviceStateChanged(NetworkDevice::DeviceStatus state)
 {
-    // qDebug() << "deviceStateChanged" << state;
     m_deviceState = state;
     switch (state) {
         case NetworkDevice::Unknown:
@@ -293,16 +289,16 @@ void WiredItem::changedActiveWiredConnectionInfo(const QJsonObject &connInfo)
     }
 
     auto strTitle = connInfo.value("ConnectionName").toString();
-    m_connectedName->setText(strTitle);
-    QFontMetrics fontMetrics(m_connectedName->font());
-    if (fontMetrics.width(strTitle) > m_connectedName->width()) {
-        strTitle = QFontMetrics(m_connectedName->font()).elidedText(strTitle, Qt::ElideRight, m_connectedName->width());
+    m_itemLabel->setText(strTitle);
+    QFontMetrics fontMetrics(m_itemLabel->font());
+    if (fontMetrics.width(strTitle) > m_itemLabel->width()) {
+        strTitle = QFontMetrics(m_itemLabel->font()).elidedText(strTitle, Qt::ElideRight, m_itemLabel->width());
     }
 
     if (strTitle.isEmpty())
-        m_connectedName->setText(m_deviceName);
+        m_itemLabel->setText(m_deviceName);
     else
-        m_connectedName->setText(strTitle);
+        m_itemLabel->setText(strTitle);
 
     emit activeConnectionChanged();
 }
